@@ -1,18 +1,21 @@
 using Test
 using PolygonArea
 
-s = rectangle(0, 0, 1, 1)
-@test (0.5, 0.5) in s
-@test (1.0, 1.0) in s
+unit_rectangle = rectangle(0, 0, 1, 1)
+@test (0.5, 0.5) in unit_rectangle
+@test (1.0, 1.0) in unit_rectangle
+@test !((1.2, 1.0) in unit_rectangle)
+@test PolygonArea.Point(0.0, 0.0) in PolygonArea.vertices(unit_rectangle)
+@test PolygonArea.Point(1.0, 0.0) in PolygonArea.vertices(unit_rectangle)
+@test !(PolygonArea.Point(0.5, 0.5) in PolygonArea.vertices(unit_rectangle))
 
-@show PolygonArea.vertices(s)
-h = HalfPlane(1, 1, -1.5)
-c = s ∩ h  # Cut the top-right corner
-@show PolygonArea.vertices(c)
+top_right_hp = HalfPlane(1, 1, -1.5)
+c1 = unit_rectangle ∩ top_right_hp  # Cut the top-right corner
+@test (0.5, 0.5) in c1
+@test !((0.9, 0.9) in c1)
 
-c = s ∩ invert(h)
-@show PolygonArea.vertices(c)
-#= @test (0, 0) in c =#
-#= @test !((0.5, 0.5) in c) =#
+c2 = unit_rectangle ∩ invert(top_right_hp)  # Keep only the top-right corner
+@test !((0.5, 0.5) in c2)
+@test (0.9, 0.9) in c2
 
-#= area(s) =#
+@test area(c1) + area(c2) ≈ area(unit_rectangle)
