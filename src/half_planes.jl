@@ -5,10 +5,37 @@ struct HalfPlane <: Surface
     c::Float64
 end
 
+# STRAIGHT LINES IN POLAR COORDINATES
+# The line is defined in polar coordinates around the center (xc, yc).
+# The angle θ is the angle of normal vector.
+#
+#   ┏━━━━━━┓          ┏━━━━━━┓           ┏━━━━━━┓           ┏━━━━━━┓
+#   ┃▒▒▒   ┃          ┃▒     ┃           ┃      ┃           ┃     ▒┃
+#   ┃▒▒▒   ┃ θ = 0    ┃▒▒    ┃ θ = π/4   ┃      ┃ θ = π/2   ┃    ▒▒┃ θ = 3π/4
+#   ┃▒▒▒   ┃          ┃▒▒▒▒  ┃           ┃▒▒▒▒▒▒┃           ┃  ▒▒▒▒┃
+#   ┃▒▒▒   ┃          ┃▒▒▒▒▒ ┃           ┃▒▒▒▒▒▒┃           ┃ ▒▒▒▒▒┃
+#   ┗━━━━━━┛          ┗━━━━━━┛           ┗━━━━━━┛           ┗━━━━━━┛
+#   ┏━━━━━━┓          ┏━━━━━━┓           ┏━━━━━━┓           ┏━━━━━━┓
+#   ┃   ▒▒▒┃          ┃ ▒▒▒▒▒┃           ┃▒▒▒▒▒▒┃           ┃▒▒▒▒▒ ┃
+#   ┃   ▒▒▒┃ θ = π    ┃  ▒▒▒▒┃ θ = 5π/4  ┃▒▒▒▒▒▒┃ θ = 3π/2  ┃▒▒▒▒  ┃ θ = 7π/4 = -π/4
+#   ┃   ▒▒▒┃          ┃    ▒▒┃           ┃      ┃           ┃▒▒    ┃
+#   ┃   ▒▒▒┃          ┃     ▒┃           ┃      ┃           ┃▒     ┃
+#   ┗━━━━━━┛          ┗━━━━━━┛           ┗━━━━━━┛           ┗━━━━━━┛
+PolarHalfPlane(r, θ; center=Point(0.0, 0.0)) = HalfPlane(cos(θ), sin(θ), -cos(θ)*center[1] - sin(θ)*center[2] - r)
+PolarHalfPlane(θ; center=Point(0.0, 0.0)) = PolarHalfPlane(0.0, θ; center=center)
+
 equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
-Base.in(p, h::HalfPlane) = equation(h)(p...) <= 0
-Base.in(p, hs::Intersection{HalfPlane}) = all((p in h) for h in hs.hs)
-Base.in(p, hs::Reunion{HalfPlane}) = any((p in h) for h in hs.hs)
+signed_distance(p::Point, h::HalfPlane) = equation(h)(p...)
+distance(p::Point, h::HalfPlane) = abs(equation(h)(p...))
+outward_normal(h::HalfPlane) = SVector{2, Float64}(-b, a)
+angle(h::HalfPlane) = mod(atan(-h.b, h.a), 2π)
+
+in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
+
+translate(h::HalfPlane, v::SVector{2, Float64}) = HalfPlane(h.a, h.b, h.c + v'*outward_normal(h))
+rotate(h::HalfPlane, ϕ; center=Point(0.0, 0.0)) = PolarHalfPlane(signed_distance(center, h), angle(h) + ϕ; center=center)
+invert(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
+exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
 
 function corner(h1::HalfPlane, h2::HalfPlane) 
     A = @SMatrix [h1.a h1.b; h2.a h2.b]
@@ -17,17 +44,22 @@ function corner(h1::HalfPlane, h2::HalfPlane)
     return x
 end
 
-Base.intersect(h1::HalfPlane, h2::HalfPlane) = Intersection{HalfPlane}([h1, h2])
-Base.intersect(h1::Intersection{HalfPlane}, h2::HalfPlane) = Intersection{HalfPlane}([h1.hs..., h2])
-Base.intersect(h1::HalfPlane, h2::Intersection{HalfPlane}) = intersect(h2, h1)
-Base.intersect(h1::Intersection{HalfPlane}, h2::Intersection{HalfPlane}) = Intersection{HalfPlane}([h1.hs..., h2.hs...])
+# Intersections of HalfPlanes
+intersect(h1::HalfPlane, h2::HalfPlane) = Intersection{HalfPlane}([h1, h2])
+intersect(h1::Intersection{HalfPlane}, h2::HalfPlane) = Intersection{HalfPlane}([h1.hs..., h2])
+intersect(h1::HalfPlane, h2::Intersection{HalfPlane}) = intersect(h2, h1)
+intersect(h1::Intersection{HalfPlane}, h2::Intersection{HalfPlane}) = Intersection{HalfPlane}([h1.hs..., h2.hs...])
 
-Base.union(h1::HalfPlane, h2::HalfPlane) = Reunion{HalfPlane}([h1, h2])
-Base.union(h1::Reunion{HalfPlane}, h2::HalfPlane) = Reunion{HalfPlane}([h1.hs..., h2])
-Base.union(h1::HalfPlane, h2::Reunion{HalfPlane}) = Reunion{HalfPlane}([h1, h2.hs...])
-Base.union(h1::Reunion{HalfPlane}, h2::Intersection{HalfPlane}) = Reunion{HalfPlane}([h1.hs..., h2.hs...])
+in(p::Point, hs::Intersection{HalfPlane}) = all((p in h) for h in hs.hs)
 
-invert(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
+# Union of HalfPlanes
+union(h1::HalfPlane, h2::HalfPlane) = Reunion{HalfPlane}([h1, h2])
+union(h1::Reunion{HalfPlane}, h2::HalfPlane) = Reunion{HalfPlane}([h1.hs..., h2])
+union(h1::HalfPlane, h2::Reunion{HalfPlane}) = Reunion{HalfPlane}([h1, h2.hs...])
+union(h1::Reunion{HalfPlane}, h2::Intersection{HalfPlane}) = Reunion{HalfPlane}([h1.hs..., h2.hs...])
+
+in(p::Point, hs::Reunion{HalfPlane}) = any((p in h) for h in hs.hs)
+
 invert(hs::Intersection{HalfPlane}) = Reunion{HalfPlane}([invert(h) for h in hs.hs])
 invert(hs::Reunion{HalfPlane}) = Intersection{HalfPlane}([invert(h) for h in hs.hs])
 

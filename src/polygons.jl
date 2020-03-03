@@ -24,9 +24,9 @@ end
 as_intersection_of_halfplanes(c::ConvexPolygon) = Intersection{HalfPlane}([corner[1] for corner in c.data])
 vertices(c::ConvexPolygon) = [corner[2] for corner in c.data]
 
-Base.in(p::Tuple, c::ConvexPolygon) = p in as_intersection_of_halfplanes(c)
+in(p::Tuple, c::ConvexPolygon) = p in as_intersection_of_halfplanes(c)
 
-function Base.intersect(c::ConvexPolygon, h::HalfPlane)
+function intersect(c::ConvexPolygon, h::HalfPlane)
 	inside = map(p -> (p in h), vertices(c))
 	if all(inside)  # The whole polygon is inside the half-space
 		return c
@@ -52,22 +52,27 @@ function Base.intersect(c::ConvexPolygon, h::HalfPlane)
 								  ))
 	end
 end
+intersect(h::HalfPlane, c::ConvexPolygon) = intersect(c, h)
 
-function Base.intersect(c::ConvexPolygon, hs::Intersection{HalfPlane})
+function intersect(c::ConvexPolygon, hs::Intersection{HalfPlane})
 	for h in hs.hs
 		c = c ∩ h
 	end
 	return c
 end
 
-Base.intersect(c1::ConvexPolygon, c2::ConvexPolygon) = Base.intersect(c1, as_intersection_of_halfplanes(h2))
+intersect(c1::ConvexPolygon, c2::ConvexPolygon) = Base.intersect(c1, as_intersection_of_halfplanes(h2))
 
 function area(h::ConvexPolygon)
-    v = vertices(h)
-	x = [xy[1] for xy in v]
-    y = [xy[2] for xy in v]
-    return abs(  sum(x[1:end-1] .* y[2:end]) + x[end]*y[1]
-               - sum(x[2:end] .* y[1:end-1]) - x[1]*y[end]
-              )/2
+	if length(h.data) == 0
+		return 0.0
+	else
+		v = vertices(h)
+		x = [xy[1] for xy in v]
+		y = [xy[2] for xy in v]
+		return abs(  sum(x[1:end-1] .* y[2:end]) + x[end]*y[1]
+				   - sum(x[2:end] .* y[1:end-1]) - x[1]*y[end]
+				  )/2
+	end
 end
 
