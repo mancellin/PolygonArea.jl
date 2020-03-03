@@ -12,7 +12,7 @@ Base.in(p, hs::Reunion{HalfPlane}) = any((p in h) for h in hs.hs)
 
 function corner(h1::HalfPlane, h2::HalfPlane) 
     A = @SMatrix [h1.a h1.b; h2.a h2.b]
-    b = @SVector [h1.c, h2.c]
+    b = @SVector [-h1.c, -h2.c]
     x = A \ b
     return x
 end

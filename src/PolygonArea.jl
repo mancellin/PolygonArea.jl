@@ -22,37 +22,71 @@ export intersect, union, invert
 #  Polygons  #
 ##############
 
+const Point = SVector{2, Float64}
+const Corner = Tuple{HalfPlane, Point, HalfPlane}
+
 struct ConvexPolygon <: Surface
-    h::Intersection{HalfPlane}
-    v::Vector{SVector{2, Float64}}
+	data::Vector{Corner}
 end
 
 function rectangle(x0, y0, x1, y1)
-    ConvexPolygon(
-                  Intersection{HalfPlane}([HalfPlane(-1, 0, x0), HalfPlane(1, 0, -x1), 
-                                           HalfPlane(0, -1, y0), HalfPlane(0, 1, -y1)]),
-                  map(SVector{2, Float64}, [[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
-                 ) 
+	left = HalfPlane(-1, 0, x0)
+	right = HalfPlane(1, 0, -x1)
+	bottom = HalfPlane(0, -1, y0)
+	top = HalfPlane(0, 1, -y1)
+	bottomleft_corner = @SVector [x0, y0]
+	bottomright_corner = @SVector [x1, y0]
+	topright_corner = @SVector [x1, y1]
+	topleft_corner = @SVector [x0, y1]
+	ConvexPolygon([(left, bottomleft_corner, bottom), (bottom, bottomright_corner, right),
+				   (right, topright_corner, top), (top, topleft_corner, left)])
 end
 
-Base.in(p::Tuple, c::ConvexPolygon) = p in c.h
+as_intersection_of_halfplanes(c::ConvexPolygon) = Intersection{HalfPlane}([corner[1] for corner in c.data])
+vertices(c::ConvexPolygon) = [corner[2] for corner in c.data]
+
+Base.in(p::Tuple, c::ConvexPolygon) = p in as_intersection_of_halfplanes(c)
 
 function Base.intersect(c::ConvexPolygon, h::HalfPlane)
-    inout = map(p -> (p in h), c.v)
-    println(inout)
-    new_v = c.v
-    return ConvexPolygon(intersect(c.h, h), new_v)
+	inside = map(p -> (p in h), vertices(c))
+	if all(inside)  # The whole polygon is inside the half-space
+		return c
+	elseif !(any(inside))  # The whole polygon is outside the half-space
+		return ConvexPolygon([])
+	else  # The half-space instersects the polygon
+		data = c.data
+		while !inside[1]
+			inside = circshift(inside, 1)
+			data = circshift(data, 1)
+		end
+		first_out = findfirst(.!inside)
+		new_corner_1 = corner(data[first_out][1], h)
+		last_out = findlast(.!inside)
+		new_corner_2 = corner(h, data[last_out][3])
+		return ConvexPolygon(vcat(
+								  data[1:first_out-1],
+								  [
+								   (data[first_out][1], new_corner_1, h),
+								   (h, new_corner_2, data[last_out][3])
+								   ],
+								  data[last_out+1:end]
+								  ))
+	end
 end
 
-#= corners = Set(corner(h1, h2) for h1 in h.hs for h2 in h.hs) =#
-#= corners = filter(is_finite, corners) =# 
-#= corners = filter(p -> (p in h), corners) =#
+function Base.intersect(c::ConvexPolygon, hs::Intersection{HalfPlane})
+	for h in hs.hs
+		c = c ∩ h
+	end
+	return c
+end
 
-#= is_finite(x::SVector) = (-Inf < x[1] < Inf) && (-Inf < x[2] < Inf) =#
+Base.intersect(c1::ConvexPolygon, c2::ConvexPolygon) = Base.intersect(c1, as_intersection_of_halfplanes(h2))
 
 function area(h::ConvexPolygon)
-    x = [xy[1] for xy in h.v]
-    y = [xy[2] for xy in h.v]
+    v = vertices(h)
+	x = [xy[1] for xy in v]
+    y = [xy[2] for xy in v]
     return abs(  sum(x[1:end-1] .* y[2:end]) + x[end]*y[1]
                - sum(x[2:end] .* y[1:end-1]) - x[1]*y[end]
               )/2
