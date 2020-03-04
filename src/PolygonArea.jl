@@ -15,11 +15,10 @@ struct Reunion{T} <: Surface
     hs::Vector{T}
 end
 
-const Point = SVector{2, Float64}
-
 # CODE
 include("half_planes.jl")
 include("polygons.jl")
+include("unions_and_intersections.jl")
 include("plot_recipes.jl")
 
 export HalfPlane, invert

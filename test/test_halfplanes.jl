@@ -1,6 +1,7 @@
 using Test
 using PolygonArea
 using PolygonArea: PolarHalfPlane, Point, distance, corner
+using StaticArrays
 
 inferior_hp = HalfPlane(0, 1, 0)
 @test Point(0, -1) in inferior_hp

@@ -1,12 +1,38 @@
 using RecipesBase
 
-@recipe function recipe(c::ConvexPolygon)
+@recipe function plot(c::ConvexPolygon)
 	seriestype --> :shape
 	linealpha --> 0.9
 	fillalpha --> 0.3
 	legend --> false
+	showaxis --> false
+	aspect_ratio --> :equal
 
-	v = vertices(c)
+	if isempty(c)
+		[], []
+	else
+		v = vertices(c)
+		push!(v, v[1])
+		[p[1] for p in v], [p[2] for p in v]
+	end
+end
+
+@recipe function plot(cs::Reunion{ConvexPolygon})
+	seriestype --> :shape
+	linealpha --> 0.9
+	fillalpha --> 0.3
+	legend --> false
+	showaxis --> false
+	aspect_ratio --> :equal
+
+	v = []
+	for c in cs.hs
+		if !isempty(c)
+			append!(v, vertices(c))
+			push!(v, vertices(c)[1])
+			push!(v, Point(NaN, NaN))
+		end
+	end
 	if length(v) > 0
 		push!(v, v[1])
 		[p[1] for p in v], [p[2] for p in v]
