@@ -7,6 +7,8 @@ import Base.in, Base.intersect, Base.union
 # MAIN TYPES
 abstract type Surface end
 
+const Point = SVector{2, Float64}
+
 struct Intersection{T} <: Surface
     hs::Vector{T}
 end

@@ -22,7 +22,9 @@ function rectangle(x0, y0, x1, y1)
 end
 
 as_intersection_of_halfplanes(c::ConvexPolygon) = Intersection{HalfPlane}([corner[1] for corner in c.data])
+
 vertices(c::ConvexPolygon) = [corner[2] for corner in c.data]
+center(c::ConvexPolygon) = (v = vertices(c); sum(v)/length(v))
 
 isempty(c::ConvexPolygon) = length(c.data) == 0
 
@@ -56,31 +58,16 @@ function intersect(c::ConvexPolygon, h::HalfPlane)
 end
 intersect(h::HalfPlane, c::ConvexPolygon) = intersect(c, h)
 
-function intersect(c::ConvexPolygon, hs::Intersection{HalfPlane})
+function intersect(c::ConvexPolygon, hs::Intersection{<:Surface})
 	for h in hs.hs
 		c = c ∩ h
 	end
 	return c
 end
-intersect(hs::Intersection{HalfPlane}, c::ConvexPolygon) = intersect(c, hs)
+intersect(hs::Intersection{<:Surface}, c::ConvexPolygon) = intersect(c, hs)
 
-intersect(c1::ConvexPolygon, c2::ConvexPolygon) = Base.intersect(c1, as_intersection_of_halfplanes(h2))
-
-center(c::ConvexPolygon) = (v = vertices(c); sum(v)/length(v))
+intersect(c1::ConvexPolygon, c2::ConvexPolygon) = intersect(c1, as_intersection_of_halfplanes(h2))
  
-function area(c::ConvexPolygon)
-	if isempty(c)
-		return 0.0
-	else
-		v = vertices(c)
-		x = [xy[1] for xy in v]
-		y = [xy[2] for xy in v]
-		return abs(  sum(x[1:end-1] .* y[2:end]) + x[end]*y[1]
-				   - sum(x[2:end] .* y[1:end-1]) - x[1]*y[end]
-				  )/2
-	end
-end
-
 function intersect(c::ConvexPolygon, hs::Reunion{HalfPlane})
 	intersec = Reunion{ConvexPolygon}([intersect(c, hs.hs[1])])
 	rest = intersect(c, invert(hs.hs[1]))
@@ -94,5 +81,23 @@ function intersect(c::ConvexPolygon, hs::Reunion{HalfPlane})
 	return intersec
 end
 intersect(hs::Reunion{HalfPlane}, c::ConvexPolygon) = intersect(c, hs)
+
+intersect(c::Reunion{ConvexPolygon}, h::HalfPlane) = union([c ∩ h for c in c.hs]...)
+intersect(c::Reunion{ConvexPolygon}, hs::Reunion{HalfPlane}) = union([c ∩ h for h in hs.hs]...)
+
+union(c1::ConvexPolygon, c2::ConvexPolygon) = Reunion{ConvexPolygon}([c1, c2])
+
+function area(c::ConvexPolygon)
+	if isempty(c)
+		return 0.0
+	else
+		v = vertices(c)
+		x = [xy[1] for xy in v]
+		y = [xy[2] for xy in v]
+		return abs(  sum(x[1:end-1] .* y[2:end]) + x[end]*y[1]
+				   - sum(x[2:end] .* y[1:end-1]) - x[1]*y[end]
+				  )/2
+	end
+end
 
 area(cs::Reunion{ConvexPolygon}) = sum(area(c) for c in cs.hs)

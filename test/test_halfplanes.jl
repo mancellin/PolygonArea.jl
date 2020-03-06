@@ -52,3 +52,10 @@ right_hp = HalfPlane(-1, 0, 0)
 #= @test invert_x_and_y(PolarHalfPlane(0.0, 0.0)) == PolarHalfPlane(0.0, π/2) =#
 #= @test invert_x_and_y(PolarHalfPlane(1.0, 0.0)) == PolarHalfPlane(1.0, π/2) =#
 #= @test invert_x_and_y(PolarHalfPlane(0.0, 0.0, 1.0, 0.0)) == PolarHalfPlane(0.0, π/2, 0.0, 1.0) =#
+
+h1 = HalfPlane(0, 0, 0)
+h2 = HalfPlane(0, 0, 0)
+h3 = HalfPlane(0, 0, 0)
+println((h1 ∩ h2) ∪ h3)
+println((h1 ∩ h2) ∪ (h3 ∩ h1))
+println((h1 ∪ h2) ∩ (h3 ∪ h1))
