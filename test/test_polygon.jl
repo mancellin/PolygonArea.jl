@@ -20,3 +20,11 @@ c2 = unit_rectangle ∩ invert(top_right_hp)  # Keep only the top-right corner
 @test Point(0.9, 0.9) in c2
 
 @test area(c1) + area(c2) ≈ area(unit_rectangle)
+
+#= empty_polygon = ConvexPolygon([]) =#
+
+r1 = rectangle(0, 0, 2, 2)
+r2 = rectangle(1, 1, 2, 2)
+r3 = rectangle(1.5, 1.5, 2.5, 2.5)
+r1 ∪ r3
+(unit_rectangle ∪ r1) ∩ (r2 ∪ r3)
