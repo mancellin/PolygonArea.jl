@@ -1,6 +1,6 @@
 using Test
 using PolygonArea
-using PolygonArea: PolarHalfPlane, Point, distance, corner
+using PolygonArea: PolarHalfPlane, Point, distance, corner, Intersection, Reunion
 using StaticArrays
 
 inferior_hp = HalfPlane(0, 1, 0)
@@ -54,8 +54,6 @@ right_hp = HalfPlane(-1, 0, 0)
 #= @test invert_x_and_y(PolarHalfPlane(0.0, 0.0, 1.0, 0.0)) == PolarHalfPlane(0.0, π/2, 0.0, 1.0) =#
 
 h1 = HalfPlane(0, 0, 0)
-h2 = HalfPlane(0, 0, 0)
-h3 = HalfPlane(0, 0, 0)
-println((h1 ∩ h2) ∪ h3)
-println((h1 ∩ h2) ∪ (h3 ∩ h1))
-println((h1 ∪ h2) ∩ (h3 ∪ h1))
+(h1 ∩ h1) ∪ (h1 ∩ h1)
+invert((h1 ∪ h1) ∩ (h1 ∪ h1))
+invert((h1 ∪ h1) ∩ (h1 ∪ h1))
