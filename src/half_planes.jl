@@ -28,7 +28,7 @@ equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
 signed_distance(p::Point, h::HalfPlane) = equation(h)(p...)
 distance(p::Point, h::HalfPlane) = abs(equation(h)(p...))
 outward_normal(h::HalfPlane) = SVector{2, Float64}(-b, a)
-angle(h::HalfPlane) = mod(atan(-h.b, h.a), 2π)
+angle(h::HalfPlane) = mod(atan(h.b, h.a), 2π)
 
 in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
 

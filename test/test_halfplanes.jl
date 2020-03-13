@@ -1,6 +1,6 @@
 using Test
-using PolygonArea
-using PolygonArea: PolarHalfPlane, Point, distance, corner, Intersection, Reunion
+using PolygonArea: PolarHalfPlane, angle
+using PolygonArea: Point, distance, corner, Intersection, Reunion
 using StaticArrays
 
 inferior_hp = HalfPlane(0, 1, 0)
@@ -42,6 +42,10 @@ right_hp = HalfPlane(-1, 0, 0)
 
 @test corner(PolarHalfPlane(0.0, 0), HalfPlane(0.0, 1.0, -1.0)) == Point(0.0, 1.0)
 @test corner(PolarHalfPlane(1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == Point(1.0, 1.5)
+
+@test angle(PolarHalfPlane(0.0, π/8)) ≈ π/8
+@test angle(PolarHalfPlane(0.0, -π/8)) ≈ mod(-π/8, 2π)
+@test angle(PolarHalfPlane(4.0, π/3)) ≈ π/3
 
 # OLD TESTS
 
