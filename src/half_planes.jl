@@ -21,14 +21,14 @@ end
 #   ┃   ▒▒▒┃          ┃    ▒▒┃           ┃      ┃           ┃▒▒    ┃
 #   ┃   ▒▒▒┃          ┃     ▒┃           ┃      ┃           ┃▒     ┃
 #   ┗━━━━━━┛          ┗━━━━━━┛           ┗━━━━━━┛           ┗━━━━━━┛
-PolarHalfPlane(r, θ; center=Point(0.0, 0.0)) = HalfPlane(cos(θ), sin(θ), -cos(θ)*center[1] - sin(θ)*center[2] - r)
+PolarHalfPlane(r, θ; center=Point(0.0, 0.0)) = HalfPlane(cos(θ), sin(θ), -cos(θ)*center[1] - sin(θ)*center[2] + r)
 PolarHalfPlane(θ; center=Point(0.0, 0.0)) = PolarHalfPlane(0.0, θ; center=center)
 
 equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
-signed_distance(p::Point, h::HalfPlane) = equation(h)(p...)
-distance(p::Point, h::HalfPlane) = abs(equation(h)(p...))
+signed_distance(p::Point, h::HalfPlane) = equation(h)(p[1], p[2])
+distance(p::Point, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
 outward_normal(h::HalfPlane) = SVector{2, Float64}(-b, a)
-angle(h::HalfPlane) = mod(atan(-h.b, h.a), 2π)
+angle(h::HalfPlane) = mod(atan(h.b, h.a), 2π)
 
 in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
 
