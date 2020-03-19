@@ -66,27 +66,40 @@ function cut(c::ConvexPolygon, h::HalfPlane)
 	end
 end
 
-intersect(c::ConvexPolygon, h::HalfPlane) = cut(c, h)[1]
-intersect(c::ConvexPolygon, hs::Intersection{HalfPlane}) = foldl(intersect, hs.hs, init=c)
-
-intersect(c1::ConvexPolygon, c2::ConvexPolygon) = intersect(c1, convert(Intersection{HalfPlane}, c2))
-
-function intersect(c::ConvexPolygon, hs::Reunion{HalfPlane})
-    inter, rest = cut(c, hs.hs[1])
-	intersec = Reunion{ConvexPolygon}(inter)
-	for h in hs.hs[2:end]
-		if isempty(rest)
+function cut(c::ConvexPolygon, hs::Intersection{HalfPlane})
+	rests = []
+	for h in hs.hs
+		c, rest = cut(c, h)
+		push!(rests, rest)
+		if isempty(c)
 			break
 		end
-        inter, rest = cut(rest, h)
-		push!(intersec.hs, inter)
 	end
-	return intersec
+	return c, Reunion{ConvexPolygon}(rests)
 end
 
-function intersect(c::ConvexPolygon, hs::Reunion{Intersection{HalfPlane}})
-    error("not implemented")
+function cut(c::ConvexPolygon, hs::Reunion{HalfPlane})
+	a, b = cut(c, invert(hs))
+	return b, a
 end
+
+function cut(c::ConvexPolygon, hs::Reunion{Intersection{HalfPlane}})
+	polys = []
+	rest = c
+	for ihp in hs.hs
+		poly, rest = cut(rest, ihp)
+		push!(polys, poly)
+	end
+	return Reunion{ConvexPolygon}(polys), rest
+end
+
+intersect(c::ConvexPolygon, h::HalfPlane) = cut(c, h)[1]
+intersect(c::ConvexPolygon, hs::Intersection{HalfPlane}) = cut(c, hs)[1]
+intersect(c1::ConvexPolygon, c2::ConvexPolygon) = intersect(c1, convert(Intersection{HalfPlane}, c2))
+
+intersect(c::ConvexPolygon, hs::Reunion{HalfPlane}) = cut(c, hs)[1]
+intersect(c::ConvexPolygon, hs::Reunion{Intersection{HalfPlane}}) = cut(c, hs)[1]
+
 
 intersect(hs::Surface, c::ConvexPolygon) = intersect(c, hs)
 
