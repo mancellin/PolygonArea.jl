@@ -1,6 +1,6 @@
 using Test
 using PolygonArea
-using PolygonArea: Point, vertices
+using PolygonArea: PolarHalfPlane, Point, vertices
 
 unit_rectangle = rectangle(0, 0, 1, 1)
 @test Point(0.5, 0.5) in unit_rectangle
@@ -21,7 +21,12 @@ c2 = unit_rectangle ∩ invert(top_right_hp)  # Keep only the top-right corner
 
 @test area(c1) + area(c2) ≈ area(unit_rectangle)
 
-#= empty_polygon = ConvexPolygon([]) =#
+top = PolarHalfPlane(0.0, 3π/2, center=Point(0.5, 0.5))
+left = PolarHalfPlane(0.0, 0.0, center=Point(0.5, 0.5))
+topleft = top ∩ left
+bottomright = invert(top) ∩ invert(left)
+mask = topleft ∪ bottomright
+unit_rectangle ∩ mask
 
 r1 = rectangle(0, 0, 2, 2)
 r2 = rectangle(1, 1, 2, 2)

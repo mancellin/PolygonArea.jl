@@ -53,3 +53,5 @@ invert(hs::Reunion{Intersection{HalfPlane}}) = foldl(intersect, [invert(h) for h
 
 in(p::Point, hs::Intersection{T}) where T = all((p in h) for h in hs.hs)
 in(p::Point, hs::Reunion{T}) where T = any((p in h) for h in hs.hs)
+
+isempty(hs::Reunion{T}) where T = all(isempty(h) for h in hs.hs)

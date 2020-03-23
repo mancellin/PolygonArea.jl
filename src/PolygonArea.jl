@@ -3,6 +3,7 @@ module PolygonArea
 # DEPENDENCIES
 using StaticArrays
 import Base.in
+import Base.isempty
 
 # MAIN TYPES
 abstract type Surface end

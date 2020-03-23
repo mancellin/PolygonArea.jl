@@ -28,7 +28,7 @@ vertices(c::ConvexPolygon) = [corner[2] for corner in c.data]
 center(c::ConvexPolygon) = (v = vertices(c); sum(v)/length(v))
 
 isempty(c::ConvexPolygon) = length(c.data) == 0
-_non_empty(l) = filter(c -> !(isempty(c)), l)
+_non_empty(l) = filter(!isempty, l)
 
 in(p::Point, c::ConvexPolygon) = in(p, convert(Intersection{HalfPlane}, c))
 
@@ -84,13 +84,24 @@ function cut(c::ConvexPolygon, hs::Reunion{HalfPlane})
 end
 
 function cut(c::ConvexPolygon, hs::Reunion{Intersection{HalfPlane}})
-	polys = []
+    polys = ConvexPolygon([])
 	rest = c
 	for ihp in hs.hs
 		poly, rest = cut(rest, ihp)
-		push!(polys, poly)
+		polys = polys ∪ poly
 	end
-	return Reunion{ConvexPolygon}(polys), rest
+	return polys, rest
+end
+
+function cut(cs::Reunion{ConvexPolygon}, h)
+    polys = ConvexPolygon([])
+    rests = ConvexPolygon([])
+    for c in cs.hs
+        poly, rest = cut(c, h)
+        polys = polys ∪ poly
+        rests = rests ∪ rest
+    end
+    return polys, rests
 end
 
 intersect(c::ConvexPolygon, h::HalfPlane) = cut(c, h)[1]
@@ -128,7 +139,7 @@ union(c1::Reunion{ConvexPolygon}, c2::Reunion{ConvexPolygon}) = Reunion{ConvexPo
 
 intersect(c1::Reunion{ConvexPolygon}, c2::ConvexPolygon) = intersect(c1, convert(Intersection{HalfPlane}, c2))
 intersect(c1::Reunion{ConvexPolygon}, c2::Reunion{ConvexPolygon}) = intersect(c1, convert(Reunion{Intersection{HalfPlane}}, c2))
-intersect(cs::Reunion{ConvexPolygon}, h::Surface) = Reunion{ConvexPolygon}(_non_empty([c ∩ h for c in cs.hs]))
+intersect(cs::Reunion{ConvexPolygon}, h::Surface) = union([c ∩ h for c in cs.hs]...)
 intersect(h::Surface, cs::Reunion{ConvexPolygon}) = intersect(cs, h)
 
 area(cs::Reunion{ConvexPolygon}) = sum(area(c) for c in cs.hs)
