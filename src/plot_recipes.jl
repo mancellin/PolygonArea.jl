@@ -35,7 +35,7 @@ end
 	aspect_ratio --> :equal
 
 	v = []
-	for c in cs.hs
+	for c in cs.content
 		if !isempty(c)
 			append!(v, vertices(c))
 			push!(v, vertices(c)[1])

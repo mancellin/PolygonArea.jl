@@ -1,3 +1,4 @@
+
 """Half plane of equation ax + by + c <= 0."""
 struct HalfPlane <: Surface
     a::Float64
@@ -24,13 +25,15 @@ end
 PolarHalfPlane(r, θ; center=Point(0.0, 0.0)) = HalfPlane(cos(θ), sin(θ), -cos(θ)*center[1] - sin(θ)*center[2] + r)
 PolarHalfPlane(θ; center=Point(0.0, 0.0)) = PolarHalfPlane(0.0, θ; center=center)
 
+show(io::IO, h::HalfPlane) = print(io, "HalfPlane(", h.a, "x + ", h.b, "y + ", h.c, " ≤ 0)")
+
 equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
 signed_distance(p::Point, h::HalfPlane) = equation(h)(p[1], p[2])
 distance(p::Point, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
+in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
+
 outward_normal(h::HalfPlane) = SVector{2, Float64}(-b, a)
 angle(h::HalfPlane) = mod(atan(h.b, h.a), 2π)
-
-in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
 
 translate(h::HalfPlane, v::SVector{2, Float64}) = HalfPlane(h.a, h.b, h.c + v'*outward_normal(h))
 rotate(h::HalfPlane, ϕ; center=Point(0.0, 0.0)) = PolarHalfPlane(signed_distance(center, h), angle(h) + ϕ; center=center)
@@ -44,5 +47,6 @@ function corner(h1::HalfPlane, h2::HalfPlane)
     return x
 end
 
+isempty(h::HalfPlane) = false
 area(h::HalfPlane) = Inf
 
