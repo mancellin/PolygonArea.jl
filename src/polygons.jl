@@ -150,4 +150,4 @@ intersect(u1::Reunion{ConvexPolygon}, u2::Reunion{ConvexPolygon}) = intersect(u1
 intersect(u::Reunion{ConvexPolygon}, h::Surface) = foldl(union, (p ∩ h for p in u.content))
 intersect(h::Surface, u::Reunion{ConvexPolygon}) = intersect(u, h)
 
-area(u::Reunion{ConvexPolygon}) = sum(area(c) for c in u.hs)
+area(u::Reunion{ConvexPolygon}) = isempty(u) ? 0.0 : sum(area(c) for c in u.content)  # WARNING: suppose disjoint union!
