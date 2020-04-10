@@ -57,7 +57,7 @@ union(i1::Intersection{HalfPlane}, i2::Intersection{HalfPlane}) = Reunion{Inters
 union(ui1::Reunion{Intersection{HalfPlane}}, ui2::Reunion{Intersection{HalfPlane}}) = Reunion{Intersection{HalfPlane}}(vcat(ui1.content, ui2.content))
 
 intersect(h1::HalfPlane, h2::HalfPlane) = Intersection{HalfPlane}([h1, h2])
-intersect(i1::Intersection{HalfPlane}, i2::Intersection{HalfPlane}) = Intersection{HalfPlane}(vcat(i1, i2))
+intersect(i1::Intersection{HalfPlane}, i2::Intersection{HalfPlane}) = Intersection{HalfPlane}(vcat(i1.content, i2.content))
 intersect(u1::Reunion{HalfPlane}, u2::Reunion{HalfPlane}) = intersect(convert(Reunion{Intersection{HalfPlane}}, u1), convert(Reunion{Intersection{HalfPlane}}, u2))
 function intersect(ui1::Reunion{Intersection{HalfPlane}}, ui2::Reunion{Intersection{HalfPlane}})
     inters = []
