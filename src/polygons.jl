@@ -23,7 +23,7 @@ end
 
 function circle(center::Point, radius::Real, nb_sides::Int)
     sides = HalfPlane[]
-    for θ in LinRange(0.0, 2π, nb_sides)
+    for θ in LinRange(0.0, 2π, nb_sides+1)[1:nb_sides]
         push!(sides, PolarHalfPlane(-radius, θ, center=center))
     end
     polygon = Corner[]
