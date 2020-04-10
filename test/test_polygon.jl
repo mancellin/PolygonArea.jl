@@ -32,3 +32,5 @@ r1 = rectangle(0, 0, 2, 2)
 r2 = rectangle(1, 1, 2, 2)
 r3 = rectangle(1.5, 1.5, 2.5, 2.5)
 (unit_rectangle ∪ r2) ∩ (r1 ∪ r3)
+
+c = circle(0.0, 0.0, 1.0, 10)

@@ -8,8 +8,8 @@ import Base.isempty
 import Base.show
 
 export HalfPlane, PolarHalfPlane
-export invert
-export rectangle, area
+export invert, area
+export rectangle, circle
 
 # TYPES
 abstract type Surface end
