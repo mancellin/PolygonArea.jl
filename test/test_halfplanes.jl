@@ -1,7 +1,7 @@
 using Test
 using PolygonArea
 using PolygonArea: PolarHalfPlane, Point, corner, Intersection, Reunion
-using PolygonArea: outward_normal, rotate, translate, distance
+using PolygonArea: outward_normal, rotate, translate, distance, exchange_x_and_y
 using StaticArrays
 
 inferior_hp = HalfPlane(0, 1, 0)
@@ -71,17 +71,15 @@ right_hp = HalfPlane(-1, 0, 0)
 @test Point(1.0, 0.0) in translate(HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(1.0, 0.1, 0.0), SVector(2.0, 0.0))
 @test Point(1.0, 0.0) in translate(HalfPlane(1.0, 0.0, 0.0) ∩ HalfPlane(1.0, 0.1, 0.0), SVector(2.0, 0.0))
 
-# OLD TESTS
+# Exchange x and y
+@test isapprox(exchange_x_and_y(PolarHalfPlane(0.0, 0.0)), PolarHalfPlane(0.0, π/2), atol=1e-14)
+@test isapprox(exchange_x_and_y(PolarHalfPlane(1.0, 0.0)), PolarHalfPlane(1.0, π/2), atol=1e-14)
+@test isapprox(exchange_x_and_y(PolarHalfPlane(0.0, 0.0, center=Point(1.0, 0.0))), PolarHalfPlane(0.0, π/2, center=Point(0.0, 1.0)), atol=1e-14)
 
-#= @test normalize(PolarHalfPlane(0.0, 0.0, 1.0, 0.0)) ≈ PolarHalfPlane(0.5, 0.0, 0.5, 0.5) =# 
-#= @test normalize(PolarHalfPlane(0.0, 0.0, 0.0, 0.0)) ≈ PolarHalfPlane(-0.5, 0.0, 0.5, 0.5) =# 
-#= @test normalize(PolarHalfPlane(0.0, π/2, 0.0, 0.0)) ≈ PolarHalfPlane(-0.5, π/2, 0.5, 0.5) =# 
+# Union and intersection
+h1 = HalfPlane(1.0, 0.0, 0.0)
+@test ((h1 ∩ h1) ∪ (h1 ∩ h1) |> typeof) == Reunion{Intersection{HalfPlane}}
+@test ((h1 ∪ h1) ∩ (h1 ∪ h1) |> typeof) == Reunion{Intersection{HalfPlane}}
 
-#= @test invert_x_and_y(PolarHalfPlane(0.0, 0.0)) == PolarHalfPlane(0.0, π/2) =#
-#= @test invert_x_and_y(PolarHalfPlane(1.0, 0.0)) == PolarHalfPlane(1.0, π/2) =#
-#= @test invert_x_and_y(PolarHalfPlane(0.0, 0.0, 1.0, 0.0)) == PolarHalfPlane(0.0, π/2, 0.0, 1.0) =#
+@test Point(0.0, 0.0) in ((h1 ∪ h1) ∩ (h1 ∪ h1) |> invert)
 
-#= h1 = HalfPlane(0, 0, 0) =#
-#= (h1 ∩ h1) ∪ (h1 ∩ h1) =#
-#= invert((h1 ∪ h1) ∩ (h1 ∪ h1)) =#
-#= invert((h1 ∪ h1) ∩ (h1 ∪ h1)) =#

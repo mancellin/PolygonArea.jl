@@ -31,7 +31,7 @@ isempty(i::Intersection) = any(isempty(h) for h in i.content)
 isempty(u::Reunion) = all(isempty(h) for h in u.content)
 
 invert(i::Intersection) = foldl(union, (invert(h) for h in i.content))
-invert(u::Reunion) = fold(intersect, (invert(h) for h in u.content))
+invert(u::Reunion) = foldl(intersect, (invert(h) for h in u.content))
 
 # Union and intersection of half planes
 

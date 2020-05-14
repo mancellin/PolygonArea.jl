@@ -6,6 +6,7 @@ using StaticArrays
 import Base.in
 import Base.isempty
 import Base.show
+import Base.isapprox
 
 export HalfPlane, PolarHalfPlane
 export invert, area
