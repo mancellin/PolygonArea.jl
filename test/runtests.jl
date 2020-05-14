@@ -1,6 +1,8 @@
 using PolygonArea
 using Test
 
-include("test_points.jl")
-include("test_halfplanes.jl")
-include("test_polygon.jl")
+@testset "PolygonArea.jl" begin
+    include("test_points.jl")
+    include("test_halfplanes.jl")
+    include("test_polygons.jl")
+end
