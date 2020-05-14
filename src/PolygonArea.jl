@@ -15,9 +15,8 @@ export rectangle, circle
 # TYPES
 abstract type Surface end
 
-const Point = SVector{2, Float64}
-
 # CODE
+include("points.jl")
 include("half_planes.jl")
 include("unions_and_intersections.jl")
 include("polygons.jl")
