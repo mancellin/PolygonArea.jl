@@ -52,6 +52,12 @@ isempty(p::ConvexPolygon) = length(p.corners) <= 2
 
 in(p::Point, c::ConvexPolygon) = in(p, convert(Intersection{HalfPlane}, c))
 
+translate(c::Corner, v) = map(x -> translate(x, v), c)
+translate(c::ConvexPolygon, v::SVector{2, Float64}) = ConvexPolygon(map(x -> translate(x, v), c.corners))
+
+rotate(c::Corner, ϕ; kw...) = map(x -> rotate(x, ϕ; kw...), c)
+rotate(c::ConvexPolygon, ϕ; kw...) = ConvexPolygon(map(x -> rotate(x, ϕ; kw...), c.corners))
+
 function cut(e::HalfPlane, h::HalfPlane)
 	new_vertex = corner(e, h)
     return ((e, new_vertex, h), (invert(h), new_vertex, e))
