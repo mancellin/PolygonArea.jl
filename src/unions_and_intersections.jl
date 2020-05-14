@@ -67,3 +67,8 @@ function intersect(ui1::Reunion{Intersection{HalfPlane}}, ui2::Reunion{Intersect
     return Reunion{Intersection{HalfPlane}}(inters)
 end
 
+rotate(u::Reunion{T}, ϕ; kw...) where T = Reunion{T}(map(x -> rotate(x, ϕ; kw...), u.content))
+rotate(i::Intersection{T}, ϕ; kw...) where T = Intersection{T}(map(x -> rotate(x, ϕ; kw...), i.content))
+
+translate(u::Reunion{T}, v) where T = Reunion{T}(map(x -> translate(x, v), u.content))
+translate(i::Intersection{T}, v) where T = Intersection{T}(map(x -> translate(x, v), i.content))

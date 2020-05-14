@@ -32,10 +32,10 @@ signed_distance(p::Point, h::HalfPlane) = equation(h)(p[1], p[2])
 distance(p::Point, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
 in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
 
-outward_normal(h::HalfPlane) = SVector{2, Float64}(-h.b, h.a)
+outward_normal(h::HalfPlane) = SVector{2, Float64}(h.a, h.b)
 angle(h::HalfPlane) = mod(atan(h.b, h.a), 2π)
 
-translate(h::HalfPlane, v::SVector{2, Float64}) = HalfPlane(h.a, h.b, h.c + v'*outward_normal(h))
+translate(h::HalfPlane, v::SVector{2, Float64}) = HalfPlane(h.a, h.b, h.c - v'*outward_normal(h))
 rotate(h::HalfPlane, ϕ; center=Point(0.0, 0.0)) = PolarHalfPlane(signed_distance(center, h), angle(h) + ϕ; center=center)
 invert(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
 exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
