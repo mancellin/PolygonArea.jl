@@ -32,7 +32,7 @@ signed_distance(p::Point, h::HalfPlane) = equation(h)(p[1], p[2])
 distance(p::Point, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
 in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
 
-outward_normal(h::HalfPlane) = SVector{2, Float64}(-b, a)
+outward_normal(h::HalfPlane) = SVector{2, Float64}(-h.b, h.a)
 angle(h::HalfPlane) = mod(atan(h.b, h.a), 2π)
 
 translate(h::HalfPlane, v::SVector{2, Float64}) = HalfPlane(h.a, h.b, h.c + v'*outward_normal(h))

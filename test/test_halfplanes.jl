@@ -1,6 +1,7 @@
 using Test
 using PolygonArea
 using PolygonArea: PolarHalfPlane, Point, corner, Intersection, Reunion
+using PolygonArea: outward_normal, rotate, translate, distance
 using StaticArrays
 
 inferior_hp = HalfPlane(0, 1, 0)
@@ -49,6 +50,14 @@ right_hp = HalfPlane(-1, 0, 0)
 
 @test PolygonArea.signed_distance(Point(0.0, 0.0), PolarHalfPlane(-4.0, 2π/3)) ≈ -4.0
 @test PolygonArea.signed_distance(Point(0.0, 0.0),PolarHalfPlane(4.0, π/3)) ≈ 4.0
+
+# Rotate
+@test outward_normal(rotate(PolarHalfPlane(0π), π)) == outward_normal(PolarHalfPlane(π))
+@test outward_normal(rotate(PolarHalfPlane(0π, center=(1.0, 1.0)), π)) == outward_normal(PolarHalfPlane(π))
+@test outward_normal(rotate(PolarHalfPlane(π/2, center=(1.0, 1.0)), π)) == outward_normal(PolarHalfPlane(3π/2))
+
+@test outward_normal(translate(PolarHalfPlane(0π), SVector{2}(1.0, 1.0))) == outward_normal(PolarHalfPlane(0π))
+@test distance(Point(0.0, 0.0), translate(PolarHalfPlane(0π), SVector{2}(1.0, 1.0))) == 1.0
 
 # OLD TESTS
 
