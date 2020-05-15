@@ -1,20 +1,32 @@
 using Test
+using StaticArrays
 using PolygonArea
-using PolygonArea: PolarHalfPlane, Point, vertices
+using PolygonArea:  Point, vertices, rotate, translate
 
 @testset "Polygons" begin
 
     @testset "creation and contained points" begin
-        unit_rectangle = rectangle(0, 0, 1, 1)
-        @test Point(0.5, 0.5) in unit_rectangle
-        @test Point(1.0, 1.0) in unit_rectangle
-        @test !(Point(1.2, 1.0) in unit_rectangle)
-        @test Point(0.0, 0.0) in vertices(unit_rectangle)
-        @test Point(1.0, 0.0) in vertices(unit_rectangle)
-        @test !(Point(0.5, 0.5) in vertices(unit_rectangle))
+        unit_square = PolygonArea.square((0, 0), 1.0)
+        @test Point(0.5, 0.5) in unit_square
+        @test Point(1.0, 1.0) in unit_square
+        @test !(Point(1.2, 1.0) in unit_square)
+        @test Point(0.0, 0.0) in vertices(unit_square)
+        @test Point(1.0, 0.0) in vertices(unit_square)
+        @test !(Point(0.5, 0.5) in vertices(unit_square))
+            
+        @test unit_square == rectangle(bottom_left=(0, 0), top_right=(1, 1))
+        @test unit_square == rectangle(bottom_left=(0, 0), top_right=(1, 1))
+        @test unit_square == rectangle((0, 0), (1, 1))
     end
 
     @testset "properties" begin
+        @test isempty(PolygonArea.ConvexPolygon([]))
+
+        @test PolygonArea.nb_sides(rectangle((0, 0), (2, 2))) == 4
+
+        @test area(PolygonArea.square((0, 0), 1.0)) == 1.0
+        @test area(rectangle((0, 0), (4, 3))) == 12.0
+        @test isapprox(area(circle(Point(0, 0), 1.0, 100)), π, atol=1e3)
     end
 
     @testset "transformations" begin
@@ -23,29 +35,29 @@ using PolygonArea: PolarHalfPlane, Point, vertices
     end
 
     @testset "union and intersection" begin
-        unit_rectangle = rectangle(0, 0, 1, 1)
+        unit_square = rectangle(0, 0, 1, 1)
         top_right_hp = HalfPlane(1, 1, -1.5)
-        c1 = unit_rectangle ∩ top_right_hp  # Cut the top-right corner
+        c1 = unit_square ∩ top_right_hp  # Cut the top-right corner
         @test Point(0.5, 0.5) in c1
         @test !(Point(0.9, 0.9) in c1)
 
-        c2 = unit_rectangle ∩ invert(top_right_hp)  # Keep only the top-right corner
+        c2 = unit_square ∩ invert(top_right_hp)  # Keep only the top-right corner
         @test !(Point(0.5, 0.5) in c2)
         @test Point(0.9, 0.9) in c2
 
-        @test area(c1) + area(c2) ≈ area(unit_rectangle)
+        @test area(c1) + area(c2) ≈ area(unit_square)
 
         top = PolarHalfPlane(0.0, 3π/2, center=Point(0.5, 0.5))
         left = PolarHalfPlane(0.0, 0.0, center=Point(0.5, 0.5))
         topleft = top ∩ left
         bottomright = invert(top) ∩ invert(left)
         mask = topleft ∪ bottomright
-        unit_rectangle ∩ mask
+        unit_square ∩ mask
 
         r1 = rectangle(0, 0, 2, 2)
         r2 = rectangle(1, 1, 2, 2)
         r3 = rectangle(1.5, 1.5, 2.5, 2.5)
-        (unit_rectangle ∪ r2) ∩ (r1 ∪ r3)
+        (unit_square ∪ r2) ∩ (r1 ∪ r3)
 
         c = circle(0.0, 0.0, 1.0, 10)
     end

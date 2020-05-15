@@ -8,45 +8,18 @@ struct ConvexPolygon <: Surface
 	corners::Vector{Corner}
 end
 
-function rectangle(x0, y0, x1, y1)
-	left = HalfPlane(-1, 0, x0)
-	right = HalfPlane(1, 0, -x1)
-	bottom = HalfPlane(0, -1, y0)
-	top = HalfPlane(0, 1, -y1)
-	bottomleft_corner = Point(x0, y0)
-	bottomright_corner = Point(x1, y0)
-	topright_corner = Point(x1, y1)
-	topleft_corner = Point(x0, y1)
-	ConvexPolygon([(left, bottomleft_corner, bottom), (bottom, bottomright_corner, right),
-				   (right, topright_corner, top), (top, topleft_corner, left)])
-end
-
-function circle(center::Point, radius::Real, nb_sides::Int)
-    sides = HalfPlane[]
-    for θ in LinRange(0.0, 2π, nb_sides+1)[1:nb_sides]
-        push!(sides, PolarHalfPlane(-radius, θ, center=center))
-    end
-    polygon = Corner[]
-    for i in 1:(nb_sides-1)
-        push!(polygon, (sides[i], corner(sides[i], sides[i+1]), sides[i+1]))
-    end
-    push!(polygon, (sides[end], corner(sides[end], sides[1]), sides[1]))
-    return ConvexPolygon(polygon)
-end
-
-circle(x0, y0, r, nb_sides) = circle(Point(x0, y0), r, nb_sides)
-
 convert(::Type{Intersection{HalfPlane}}, p::ConvexPolygon) = Intersection{HalfPlane}([c[1] for c in p.corners])
 convert(::Type{Reunion{Intersection{HalfPlane}}}, c::ConvexPolygon) = convert(Reunion{Intersection{HalfPlane}}, convert(Intersection{HalfPlane}, c))
 
-show(io::IO, p::ConvexPolygon) = print(io, "ConvexPolygon with $(length(p.corners)) sides")
+==(c1::ConvexPolygon, c2::ConvexPolygon) = all(c1.corners .== c2.corners)
 
 nb_vertices(p::ConvexPolygon) = length(p.corners)
-nb_edges(p::ConvexPolygon) = length(p.corners)
+nb_sides(p::ConvexPolygon) = length(p.corners)
+
+show(io::IO, p::ConvexPolygon) = print(io, "ConvexPolygon with $(nb_sides(p)) sides")
 
 vertices(p::ConvexPolygon) = [c[2] for c in p.corners]
-edges(p::ConvexPolygon) = [c[1] for c in p.corners]
-center(p::ConvexPolygon) = (v = vertices(p); sum(v)/length(v))
+sides(p::ConvexPolygon) = [c[1] for c in p.corners]
 
 isempty(p::ConvexPolygon) = length(p.corners) <= 2
 
