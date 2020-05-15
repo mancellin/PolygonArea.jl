@@ -31,6 +31,8 @@ translate(c::ConvexPolygon, v) = ConvexPolygon(map(x -> translate(x, v), c.corne
 rotate(c::Corner, ϕ; kw...) = map(x -> rotate(x, ϕ; kw...), c)
 rotate(c::ConvexPolygon, ϕ; kw...) = ConvexPolygon(map(x -> rotate(x, ϕ; kw...), c.corners))
 
+invert(c::ConvexPolygon) = invert(convert(Intersection{HalfPlane}, c))
+
 function cut(e::HalfPlane, h::HalfPlane)
 	new_vertex = corner(e, h)
     return ((e, new_vertex, h), (invert(h), new_vertex, e))
@@ -144,4 +146,9 @@ intersect(u1::Reunion{ConvexPolygon}, u2::Reunion{ConvexPolygon}) = intersect(u1
 intersect(u::Reunion{ConvexPolygon}, h::Surface) = foldl(union, (p ∩ h for p in u.content))
 intersect(h::Surface, u::Reunion{ConvexPolygon}) = intersect(u, h)
 
+invert(c::Reunion{ConvexPolygon}) = invert(convert(Reunion{Intersection{HalfPlane}}, c))
+
 area(u::Reunion{ConvexPolygon}) = isempty(u) ? 0.0 : sum(area(c) for c in u.content)  # WARNING: suppose disjoint union!
+
+const Polygons = Union{ConvexPolygon, Reunion{ConvexPolygon}}
+\(c1::Polygons, c2::Polygons) = c1 ∩ invert(c2)

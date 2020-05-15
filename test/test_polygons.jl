@@ -1,7 +1,7 @@
 using Test
 using StaticArrays
 using PolygonArea
-using PolygonArea:  Point, vertices, rotate, translate, square
+using PolygonArea: Reunion, Point, vertices, rotate, translate, square
 
 @testset "Polygons" begin
 
@@ -50,6 +50,9 @@ using PolygonArea:  Point, vertices, rotate, translate, square
         @test Point(0.9, 0.9) in c2
 
         @test area(c1) + area(c2) ≈ area(unit_square)
+
+        @test (square((0.0, 0.0), 1.0) |> invert |> typeof) == Reunion{HalfPlane}
+        @test area(square((0.0, 0.0), 3.0) \ square((1.0, 1.0), 1.0)) == 8.0
 
         top = PolarHalfPlane(0.0, 3π/2, center=Point(0.5, 0.5))
         left = PolarHalfPlane(0.0, 0.0, center=Point(0.5, 0.5))

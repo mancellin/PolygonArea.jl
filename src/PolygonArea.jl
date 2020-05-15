@@ -5,7 +5,7 @@ using StaticArrays
 
 import Base.==, Base.isapprox
 import Base.in, Base.isempty
-import Base.union, Base.intersect
+import Base.union, Base.intersect, Base.\
 import Base.convert, Base.promote_rule
 import Base.show
 
