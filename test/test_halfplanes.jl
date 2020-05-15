@@ -54,6 +54,9 @@ using StaticArrays
         @test outward_normal(rotate(PolarHalfPlane(0π, center=(1.0, 1.0)), π)) == outward_normal(PolarHalfPlane(π))
         @test outward_normal(rotate(PolarHalfPlane(π/2, center=(1.0, 1.0)), π)) == outward_normal(PolarHalfPlane(3π/2))
 
+        @test (PolarHalfPlane(0.234π) |> rotate(π) |> rotate(-π)) ≈ PolarHalfPlane(0.234π)
+        @test (PolarHalfPlane(0.234π) |> rotate(π) |> rotate(π)) ≈ PolarHalfPlane(0.234π)
+
         @test Point(1.0, 0.0) in rotate(HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(1.0, 0.1, 0.0), π)
         @test Point(1.0, 0.0) in rotate(HalfPlane(1.0, 0.0, 0.0) ∩ HalfPlane(1.0, 0.1, 0.0), π)
 
@@ -64,6 +67,8 @@ using StaticArrays
 
         @test Point(1.0, 0.0) in translate(HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(1.0, 0.1, 0.0), SVector(2.0, 0.0))
         @test Point(1.0, 0.0) in translate(HalfPlane(1.0, 0.0, 0.0) ∩ HalfPlane(1.0, 0.1, 0.0), SVector(2.0, 0.0))
+
+        @test translate(HalfPlane(1.0, 0.0, 0.0), SVector(2.0, 0.0)) == (HalfPlane(1.0, 0.0, 0.0) |> translate(SVector(2.0, 0.0)))
 
         # Exchange x and y
         @test isapprox(exchange_x_and_y(PolarHalfPlane(0.0, 0.0)), PolarHalfPlane(0.0, π/2), atol=1e-14)
