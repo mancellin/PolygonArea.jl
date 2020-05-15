@@ -11,10 +11,10 @@ end
 convert(::Type{Intersection{HalfPlane}}, p::ConvexPolygon) = Intersection{HalfPlane}([c[1] for c in p.corners])
 convert(::Type{Reunion{Intersection{HalfPlane}}}, c::ConvexPolygon) = convert(Reunion{Intersection{HalfPlane}}, convert(Intersection{HalfPlane}, c))
 
-==(c1::ConvexPolygon, c2::ConvexPolygon) = all(c1.corners .== c2.corners)
-
 nb_vertices(p::ConvexPolygon) = length(p.corners)
 nb_sides(p::ConvexPolygon) = length(p.corners)
+
+==(c1::ConvexPolygon, c2::ConvexPolygon) = nb_sides(c1) == nb_sides(c2) && all(c1.corners .== c2.corners)
 
 show(io::IO, p::ConvexPolygon) = print(io, "ConvexPolygon with $(nb_sides(p)) sides")
 

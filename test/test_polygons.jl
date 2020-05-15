@@ -1,12 +1,12 @@
 using Test
 using StaticArrays
 using PolygonArea
-using PolygonArea:  Point, vertices, rotate, translate
+using PolygonArea:  Point, vertices, rotate, translate, square
 
 @testset "Polygons" begin
 
     @testset "creation and contained points" begin
-        unit_square = PolygonArea.square((0, 0), 1.0)
+        unit_square = square((0, 0), 1.0)
         @test Point(0.5, 0.5) in unit_square
         @test Point(1.0, 1.0) in unit_square
         @test !(Point(1.2, 1.0) in unit_square)
@@ -17,6 +17,8 @@ using PolygonArea:  Point, vertices, rotate, translate
         @test unit_square == rectangle(bottom_left=(0, 0), top_right=(1, 1))
         @test unit_square == rectangle(bottom_left=(0, 0), top_right=(1, 1))
         @test unit_square == rectangle((0, 0), (1, 1))
+
+        @test !(PolygonArea.ConvexPolygon([]) == square((1, 1), 1))
     end
 
     @testset "properties" begin
