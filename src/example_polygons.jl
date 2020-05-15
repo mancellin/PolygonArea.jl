@@ -18,7 +18,7 @@ rectangle(; bottom_left, top_right) = rectangle(bottom_left, top_right)
 square(bottom_left, side::Number) = rectangle(bottom_left..., bottom_left[1] + side, bottom_left[2] + side)
 square(; bottom_left, side) = square(bottom_left, side)
 
-function circle(center::Point, radius::Real, nb_sides::Int)
+function circle(center, radius::Real, nb_sides::Int)
     sides = HalfPlane[]
     for θ in LinRange(0.0, 2π, nb_sides+1)[1:nb_sides]
         push!(sides, PolarHalfPlane(-radius, θ, center=center))
