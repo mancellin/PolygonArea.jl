@@ -3,11 +3,11 @@ module PolygonArea
 # IMPORT/EXPORT
 using StaticArrays
 
-import Base.==
-import Base.in
-import Base.isempty
+import Base.==, Base.isapprox
+import Base.in, Base.isempty
+import Base.union, Base.intersect
+import Base.convert, Base.promote_rule
 import Base.show
-import Base.isapprox
 
 export HalfPlane, PolarHalfPlane
 export invert, area

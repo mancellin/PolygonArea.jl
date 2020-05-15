@@ -1,6 +1,5 @@
 # GENERAL RULES FOR INTERSECTION AND UNIONS
 
-import Base.in, Base.union, Base.intersect, Base.convert, Base.promote_rule
 using Base.Iterators: product
 
 struct Intersection{T <: Surface} <: Surface

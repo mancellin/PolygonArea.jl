@@ -1,3 +1,4 @@
+# HALF-PLANES
 
 """Half plane of equation ax + by + c <= 0."""
 struct HalfPlane <: Surface
