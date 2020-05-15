@@ -23,7 +23,7 @@ sides(p::ConvexPolygon) = [c[1] for c in p.corners]
 
 isempty(p::ConvexPolygon) = length(p.corners) <= 2
 
-in(p::Point, c::ConvexPolygon) = in(p, convert(Intersection{HalfPlane}, c))
+in(p, c::ConvexPolygon) = in(p, convert(Intersection{HalfPlane}, c))
 
 translate(c::Corner, v) = map(x -> translate(x, v), c)
 translate(c::ConvexPolygon, v::SVector{2, Float64}) = ConvexPolygon(map(x -> translate(x, v), c.corners))

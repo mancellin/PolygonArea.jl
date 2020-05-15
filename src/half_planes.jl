@@ -30,9 +30,9 @@ isapprox(h1::HalfPlane, h2::HalfPlane; kw...) = all((isapprox(h1.a, h2.a; kw...)
 show(io::IO, h::HalfPlane) = print(io, "HalfPlane(", h.a, "x + ", h.b, "y + ", h.c, " ≤ 0)")
 
 equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
-signed_distance(p::Point, h::HalfPlane) = equation(h)(p[1], p[2])
-distance(p::Point, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
-in(p::Point, h::HalfPlane) = equation(h)(p...) <= 0.0
+signed_distance(p, h::HalfPlane) = equation(h)(p[1], p[2])
+distance(p, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
+in(p, h::HalfPlane) = equation(h)(p...) <= 0.0
 
 outward_normal(h::HalfPlane) = SVector{2, Float64}(h.a, h.b)
 angle(h::HalfPlane) = mod(atan(h.b, h.a), 2π)

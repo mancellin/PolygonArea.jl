@@ -19,6 +19,8 @@ using StaticArrays
         @test !(Point(-1, 0) in HalfPlane(-1, 0, 0))
 
         @test Point(0.5, 0.5) in PolarHalfPlane(-1.0, 0π)
+        @test (0.5, 0.5) in PolarHalfPlane(-1.0, 0π)
+
         @test Point(0.5, 0.5) in PolarHalfPlane(-1.0, π/2)
         @test Point(0.5, 0.5) in PolarHalfPlane(-1.0, π)
         @test Point(0.5, 0.5) in PolarHalfPlane(-1.0, 3π/2)
@@ -30,6 +32,8 @@ using StaticArrays
 
     @testset "properties" begin
         @test distance(Point(9.0, 0.0), PolarHalfPlane(0.0, 0.0)) ≈ 9.0
+        @test distance((9.0, 0.0), PolarHalfPlane(0.0, 0.0)) ≈ 9.0
+
         @test distance(Point(9.0, 0.0), PolarHalfPlane(1.0, 0.0)) ≈ 10.0
         @test distance(Point(9.0, -10.0), PolarHalfPlane(1.0, 0.0)) ≈ 10.0
         @test distance(Point(9.0, 1.0), PolarHalfPlane(0.0, π/2)) ≈ 1.0
