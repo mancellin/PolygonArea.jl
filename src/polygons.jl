@@ -151,7 +151,9 @@ invert(c::Reunion{ConvexPolygon}) = invert(convert(Reunion{Intersection{HalfPlan
 const Polygons = Union{ConvexPolygon, Reunion{ConvexPolygon}}
 \(c1::Polygons, c2::Polygons) = c1 ∩ invert(c2)
 
+disjoint(c::ConvexPolygon) = c
 function disjoint(u::Reunion{ConvexPolygon})
+    isempty(u) && return u
     l = u.content[1]
     for c in u.content[2:end]
         l = l ∪ (c \ l)
