@@ -26,7 +26,7 @@ end
 	end
 end
 
-@recipe function plot(cs::Reunion{ConvexPolygon})
+@recipe function plot(cs::Reunion{ConvexPolygon{T}}) where T
 	seriestype --> :shape
 	linealpha --> 0.9
 	fillalpha --> 0.3
