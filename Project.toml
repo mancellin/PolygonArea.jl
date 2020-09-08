@@ -1,7 +1,7 @@
 name = "PolygonArea"
 uuid = "f818da22-b9d0-4424-a67f-6ca99e6cd93f"
 authors = ["Matthieu Ancellin <matthieu.ancellin@ens-paris-saclay.fr>"]
-version = "0.2.0dev"
+version = "0.2.0-dev"
 
 [deps]
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
