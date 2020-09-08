@@ -148,7 +148,15 @@ intersect(h::Surface, u::Reunion{ConvexPolygon}) = intersect(u, h)
 
 invert(c::Reunion{ConvexPolygon}) = invert(convert(Reunion{Intersection{HalfPlane}}, c))
 
-area(u::Reunion{ConvexPolygon}) = isempty(u) ? 0.0 : sum(area(c) for c in u.content)  # WARNING: suppose disjoint union!
-
 const Polygons = Union{ConvexPolygon, Reunion{ConvexPolygon}}
 \(c1::Polygons, c2::Polygons) = c1 ∩ invert(c2)
+
+function disjoint(u::Reunion{ConvexPolygon})
+    l = u.content[1]
+    for c in u.content[2:end]
+        l = l ∪ (c \ l)
+    end
+    return l
+end
+area(u::Reunion{ConvexPolygon}) = isempty(u) ? 0.0 : sum(area(c) for c in u.content)
+

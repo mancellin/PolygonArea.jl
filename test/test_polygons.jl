@@ -67,5 +67,10 @@ using PolygonArea: Reunion, Point, vertices, rotate, translate, square
         (unit_square ∪ r2) ∩ (r1 ∪ r3)
 
         c = circle(0.0, 0.0, 1.0, 10)
+
+        h = rectangle(0, 1/3, 1, 2/3)
+        v = rectangle(1/3, 0, 2/3, 1)
+        @test area(h ∪ v) ≈ 6/9
+        @test area(PolygonArea.disjoint(h ∪ v)) ≈ 5/9
     end
 end
