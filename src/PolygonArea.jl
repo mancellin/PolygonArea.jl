@@ -20,8 +20,11 @@ abstract type Surface end
 include("points.jl")
 include("half_planes.jl")
 include("unions_and_intersections.jl")
+
 include("polygons.jl")
 include("example_polygons.jl")
+
+include("io.jl")
 include("plot_recipes.jl")
 
 rotate(ϕ::Number; kw...) = x -> rotate(x, ϕ; kw...)

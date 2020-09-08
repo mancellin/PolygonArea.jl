@@ -16,8 +16,6 @@ nb_sides(p::ConvexPolygon) = length(p.corners)
 
 ==(c1::ConvexPolygon, c2::ConvexPolygon) = nb_sides(c1) == nb_sides(c2) && all(c1.corners .== c2.corners)
 
-show(io::IO, p::ConvexPolygon) = print(io, "ConvexPolygon with $(nb_sides(p)) sides")
-
 vertices(p::ConvexPolygon) = [c[2] for c in p.corners]
 sides(p::ConvexPolygon) = [c[1] for c in p.corners]
 
