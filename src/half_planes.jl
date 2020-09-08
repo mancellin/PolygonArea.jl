@@ -1,10 +1,10 @@
 # HALF-PLANES
 
 """Half plane of equation ax + by + c <= 0."""
-struct HalfPlane <: Surface
-    a::Float64
-    b::Float64
-    c::Float64
+struct HalfPlane{T} <: Surface
+    a::T
+    b::T
+    c::T
 end
 
 # POLAR COORDINATES
@@ -32,9 +32,9 @@ show(io::IO, h::HalfPlane) = print(io, "HalfPlane(", h.a, "x + ", h.b, "y + ", h
 equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
 signed_distance(p, h::HalfPlane) = equation(h)(p[1], p[2])
 distance(p, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
-in(p, h::HalfPlane) = equation(h)(p...) <= 0.0
+in(p, h::HalfPlane) = equation(h)(p[1], p[2]) <= 0.0
 
-outward_normal(h::HalfPlane) = SVector{2, Float64}(h.a, h.b)
+outward_normal(h::HalfPlane{T}) where T = SVector{2, T}(h.a, h.b)
 angle(h::HalfPlane) = mod(atan(h.b, h.a), 2π)
 
 translate(h::HalfPlane, v) = (n = outward_normal(h); HalfPlane(h.a, h.b, h.c - v[1]*n[1] - v[2]*n[2]))

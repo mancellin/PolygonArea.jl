@@ -8,11 +8,21 @@ using StaticArrays
 
 @testset "Half-planes" begin
 
-    @testset "creation and contained points" begin
-        @test HalfPlane(1, 0, 0) isa HalfPlane
-        @test PolarHalfPlane(0.0, π, center=(1.0, 1.0)) isa HalfPlane
+    @testset "creation and equality" begin
+        @test HalfPlane(1.0, 0.0, 0.0) isa HalfPlane{Float64}
+        @test PolarHalfPlane(0.0, π, center=(1.0, 1.0)) isa HalfPlane{Float64}
 
+        @test HalfPlane(1, 0, 0) isa HalfPlane{Int}
+        @test HalfPlane{Float64}(1, 0, 0) isa HalfPlane{Float64}
+
+        @test HalfPlane(1.0, 0.0, 0.0) == HalfPlane(1.0, 0.0, 0.0)
+        @test HalfPlane(1.0, 0.0, 0.0) != HalfPlane(1.0, 1e-15, 0.0)
+        @test HalfPlane(1.0, 0.0, 0.0) ≈ HalfPlane(1.0, 0.0, 0.0)
+    end
+
+    @testset "contained points" begin
         @test Point(0, -1)   in HalfPlane(0, 1, 0)
+        @test Point(0, -1)   in HalfPlane(0.0, 1.0, 0.0)
         @test Point(0, 0)    in HalfPlane(0, 1, 0)
         @test !(Point(0, 1)  in HalfPlane(0, 1, 0))
         @test Point(1, 0)    in HalfPlane(-1, 0, 0)
@@ -86,21 +96,31 @@ using StaticArrays
         @test Point(1, -1) in intersect(inferior_hp, right_hp)
         @test Point(1, -1) in inferior_hp ∩ right_hp
         @test !(Point(1, 1) in intersect(inferior_hp, right_hp))
-        @test Point(1, 1) in invert(intersect(inferior_hp, right_hp))
+        @test Point(1, 1) in invert(inferior_hp ∩ right_hp)
+        @test Point(1, 1) in invert(inferior_hp ∪ invert(right_hp))
 
         @test !(Point(-1, 1) in union(inferior_hp, right_hp))
         @test (Point(1, 1) in union(inferior_hp, right_hp))
 
-        @test corner(HalfPlane(0, 1, 0), HalfPlane(-1, 0, 0)) == Point(0.0, 0.0)
-        @test corner(HalfPlane(1, 0, 1), HalfPlane(0, -1, 0.5)) == Point(-1.0, 0.5)
-        @test corner(PolarHalfPlane(0.0, 0), HalfPlane(0.0, 1.0, -1.0)) == Point(0.0, 1.0)
+        @test corner(HalfPlane(0.0, 1.0, 0.0), HalfPlane(-1.0, 0.0, 0.0)) == Point(0.0, 0.0)
+        @test corner(HalfPlane(1.0, 0.0, 1.0), HalfPlane(0.0, -1.0, 0.5)) == Point(-1.0, 0.5)
+        @test corner(PolarHalfPlane(0.0, 0.0), HalfPlane(0.0, 1.0, -1.0)) == Point(0.0, 1.0)
         @test corner(PolarHalfPlane(-1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == Point(1.0, 1.5)
 
         # Union and intersection
         h1 = HalfPlane(1.0, 0.0, 0.0)
-        @test ((h1 ∩ h1) ∪ (h1 ∩ h1) |> typeof) == Reunion{Intersection{HalfPlane}}
-        @test ((h1 ∪ h1) ∩ (h1 ∪ h1) |> typeof) == Reunion{Intersection{HalfPlane}}
+        @test ((h1 ∩ h1) ∪ (h1 ∩ h1)) isa Reunion{Intersection{HalfPlane{Float64}}}
+        @test ((h1 ∪ h1) ∩ (h1 ∪ h1)) isa Reunion{Intersection{HalfPlane{Float64}}}
+
+        HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(0.0, 1.0, 0.0) ∩ (HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(0.0, 1.0, 0.0))
 
         @test Point(0.0, 0.0) in ((h1 ∪ h1) ∩ (h1 ∪ h1) |> invert)
     end
+
+    @testset "conversion" begin
+        a = HalfPlane{Int}(1, 1, 1)
+        b = HalfPlane{Int}(-1, 1, 1)
+        @test convert(Reunion{Intersection{HalfPlane{Int}}}, a ∪ b) isa Reunion{Intersection{HalfPlane{Int}}}
+    end
+
 end
