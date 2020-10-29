@@ -40,9 +40,11 @@ end
 function cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T
 	inside = map(v -> (v in h), vertices(c))
 	if all(inside)  # The whole polygon is inside the half-space
-        return (c, ConvexPolygon{T}([]))
+        poly_in = c
+        poly_out = ConvexPolygon{T}([])
 	elseif !(any(inside))  # The whole polygon is outside the half-space
-        return (ConvexPolygon{T}([]), c)
+        poly_in = ConvexPolygon{T}([])
+        poly_out = c
 	else  # The half-space instersects the polygon
         corners = copy(c.corners)
 		while !inside[1]
@@ -58,42 +60,43 @@ function cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T
         other_intersected_edge = corners[last_out][3]
         new_corner_out_2, new_corner_in_2 = cut(other_intersected_edge, invert(h))
 
-        return (
-                ConvexPolygon{T}(vcat(
-                                   corners[1:first_out-1],
-                                   [new_corner_in_1, new_corner_in_2],
-                                   corners[last_out+1:end]
-                                   )),
-                ConvexPolygon{T}(vcat(
-                                   corners[first_out:last_out],
-                                   [new_corner_out_2, new_corner_out_1],
-                                   )),
-               )
+        poly_in = ConvexPolygon{T}(vcat(
+                                        corners[1:first_out-1],
+                                        [new_corner_in_1, new_corner_in_2],
+                                        corners[last_out+1:end]
+                                       ))
+        poly_out = ConvexPolygon{T}(vcat(
+                                         corners[first_out:last_out],
+                                         [new_corner_out_2, new_corner_out_1],
+                                        ))
     end
+    return Reunion{ConvexPolygon{T}}([poly_in]), Reunion{ConvexPolygon{T}}([poly_out])
 end
 
-function cut(c::ConvexPolygon, i::Intersection) where T
-	rests = []
+function cut(c::ConvexPolygon{T}, i::Intersection{HalfPlane{T}}) where T
+    rests = Reunion{ConvexPolygon{T}}([])
+    cc = Reunion{ConvexPolygon{T}}([c])
 	for h in i.content
-		c, rest = cut(c, h)
-		push!(rests, rest)
+		cc, rest = cut(cc, h)
+		rests = rests ∪ rest
 		if isempty(c)
 			break
 		end
 	end
-	return c, foldl(union, rests)
+    return cc, rests
 end
 
-function cut(c::ConvexPolygon, u::Reunion)
-    polys = []
-    for h in u.content
-        poly, c = cut(c, h)
-		push!(polys, poly)
+function cut(c::ConvexPolygon{T}, u::Reunion{Intersection{HalfPlane{T}}}) where T
+    polys = Reunion{ConvexPolygon{T}}([])
+    cc = Reunion{ConvexPolygon{T}}([c])
+    for i in u.content
+        poly, cc = cut(cc, i)
+		polys = polys ∪ poly
 		if isempty(c)
 			break
 		end
     end
-    return foldl(union, polys), c 
+    return polys, cc
 end
 
 intersect(c::ConvexPolygon{T}, h::HalfPlane{T}) where T = cut(c, h)[1]
@@ -126,8 +129,8 @@ convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{ConvexPolygon{T}
 promote_rule(::Type{ConvexPolygon{T}}, ::Type{Reunion{ConvexPolygon{T}}}) where T = Reunion{ConvexPolygon{T}}
 
 function cut(cs::Reunion{ConvexPolygon{T}}, h) where T
-    polys = ConvexPolygon{T}([])
-    rests = ConvexPolygon{T}([])
+    polys = Reunion{ConvexPolygon{T}}([])
+    rests = Reunion{ConvexPolygon{T}}([])
     for c in cs.content
         poly, rest = cut(c, h)
         polys = polys ∪ poly
