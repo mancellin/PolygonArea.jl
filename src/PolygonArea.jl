@@ -29,5 +29,6 @@ include("plot_recipes.jl")
 
 rotate(ϕ::Number; kw...) = x -> rotate(x, ϕ; kw...)
 translate(v::SVector{2, Float64}) = x -> translate(x, v)
+translate(v::Vector{Float64}) = x -> translate(x, v)
 
 end # module
