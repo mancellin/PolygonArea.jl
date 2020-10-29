@@ -86,6 +86,10 @@ function cut(c::ConvexPolygon{T}, i::Intersection{HalfPlane{T}}) where T
     return cc, rests
 end
 
+function cut(c::ConvexPolygon{T}, u::Reunion{HalfPlane{T}}) where T
+    cut(c, convert(Reunion{Intersection{HalfPlane{T}}}, u))
+end
+
 function cut(c::ConvexPolygon{T}, u::Reunion{Intersection{HalfPlane{T}}}) where T
     polys = Reunion{ConvexPolygon{T}}([])
     cc = Reunion{ConvexPolygon{T}}([c])
