@@ -38,11 +38,12 @@ end
 
 """Returns the couple of ConvexPolygon obtained by cutting c by the plane h."""
 function cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T
-	inside = map(v -> (v in h), vertices(c))
+	inside = map(v -> equation(h)(v[1], v[2]) <= 1e-13, vertices(c))
+	outside = map(v -> equation(h)(v[1], v[2]) >= -1e-13, vertices(c))
 	if all(inside)  # The whole polygon is inside the half-space
         poly_in = c
         poly_out = ConvexPolygon{T}([])
-	elseif !(any(inside))  # The whole polygon is outside the half-space
+    elseif all(outside)  # The whole polygon is outside the half-space
         poly_in = ConvexPolygon{T}([])
         poly_out = c
 	else  # The half-space instersects the polygon
@@ -79,7 +80,7 @@ function cut(c::ConvexPolygon{T}, i::Intersection{HalfPlane{T}}) where T
 	for h in i.content
 		cc, rest = cut(cc, h)
 		rests = rests ∪ rest
-		if isempty(c)
+		if isempty(cc)
 			break
 		end
 	end

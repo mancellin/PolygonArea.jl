@@ -77,5 +77,10 @@ using PolygonArea: Reunion, Point, vertices, rotate, translate, square
         v = rectangle(1/3, 0.0, 2/3, 1.0)
         @test area(h ∪ v) ≈ 6/9
         @test area(PolygonArea.disjoint(h ∪ v)) ≈ 5/9
+
+        # A floating point bug: intersection of a circle with a tangeant half plane
+        c = circle((0.5, 0.5), 0.4, 60) |> rotate(π/5, center=(0.5, 0.5))
+        r = rectangle(0.45, 0.10, 0.46, 0.11)
+        @test PolygonArea.area(r ∩ c) ≈ PolygonArea.area(c ∩ r) 
     end
 end
