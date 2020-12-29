@@ -7,6 +7,19 @@ struct HalfPlane{T} <: Surface
     c::T
 end
 
+
+function HalfPlane(p1, p2, side=:right)
+    T = eltype(p1)
+    a = - p2[2] + p1[2]
+    b = + p2[1] - p1[1]
+    c = - a*p1[1] - b*p1[2]
+    if side==:right
+        HalfPlane{T}(a, b, c)
+    else
+        HalfPlane{T}(-a, -b, -c)
+    end
+end
+
 # POLAR COORDINATES
 # The line is defined in polar coordinates around the center (xc, yc).
 # The angle θ is the angle of normal vector.
@@ -41,7 +54,7 @@ rotate(h::HalfPlane, ϕ; center=Point(0.0, 0.0)) = PolarHalfPlane(signed_distanc
 invert(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
 exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
 
-function corner(h1::HalfPlane, h2::HalfPlane) 
+function corner(h1::HalfPlane, h2::HalfPlane)  # TODO: rename corner_point
     A = @SMatrix [h1.a h1.b; h2.a h2.b]
     b = @SVector [-h1.c, -h2.c]
     x = A \ b

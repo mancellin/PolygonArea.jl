@@ -4,8 +4,21 @@
 
 const Corner{T} = Tuple{HalfPlane{T}, Point{T}, HalfPlane{T}}
 
+Corner(p1, p2, p3) = (HalfPlane(p1, p2), p2, HalfPlane(p2, p3))
+
 struct ConvexPolygon{T} <: Surface
     corners::Vector{Corner{T}}
+end
+
+function ConvexPolygon(ps...)
+    n = length(ps)
+    corners = []
+    for i in 1:n
+        im1 = mod(i - 1, Base.OneTo(n))
+        ip1 = mod(i + 1, Base.OneTo(n))
+        push!(corners, Corner(ps[im1], ps[i], ps[ip1]))
+    end
+    return ConvexPolygon{eltype(ps[1])}(corners)
 end
 
 convert(::Type{Intersection{HalfPlane{T}}}, p::ConvexPolygon{T}) where T = Intersection{HalfPlane{T}}([c[1] for c in p.corners])
