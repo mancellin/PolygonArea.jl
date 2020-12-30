@@ -44,47 +44,40 @@ rotate(c::ConvexPolygon{T}, ϕ; kw...) where T = ConvexPolygon{T}(map(x -> rotat
 
 invert(c::ConvexPolygon{T}) where T = invert(convert(Intersection{HalfPlane{T}}, c))
 
-function cut(e::HalfPlane, h::HalfPlane)
-	new_vertex = corner_point(e, h)
-    return ((e, new_vertex, h), (invert(h), new_vertex, e))
-end
-
 """Returns the couple of ConvexPolygon obtained by cutting c by the plane h."""
 function cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T
-	inside = map(v -> equation(h)(v[1], v[2]) <= 1e-13, vertices(c))
-	outside = map(v -> equation(h)(v[1], v[2]) >= -1e-13, vertices(c))
-	if all(inside)  # The whole polygon is inside the half-space
-        poly_in = c
-        poly_out = ConvexPolygon{T}([])
-    elseif all(outside)  # The whole polygon is outside the half-space
-        poly_in = ConvexPolygon{T}([])
-        poly_out = c
-	else  # The half-space instersects the polygon
-        corners = copy(c.corners)
-		while !inside[1]
-			inside = circshift(inside, 1)
-			corners = circshift(corners, 1)
-		end
-
-		first_out = findfirst(.!inside)
-        intersected_edge = corners[first_out][1]
-		new_corner_in_1, new_corner_out_1 = cut(intersected_edge, h)
-
-		last_out = findlast(.!inside)
-        other_intersected_edge = corners[last_out][3]
-        new_corner_out_2, new_corner_in_2 = cut(other_intersected_edge, invert(h))
-
-        poly_in = ConvexPolygon{T}(vcat(
-                                        corners[1:first_out-1],
-                                        [new_corner_in_1, new_corner_in_2],
-                                        corners[last_out+1:end]
-                                       ))
-        poly_out = ConvexPolygon{T}(vcat(
-                                         corners[first_out:last_out],
-                                         [new_corner_out_2, new_corner_out_1],
-                                        ))
+    poly_in = ConvexPolygon{T}(Corner[])
+    # sizehint!(poly_in.corners, nb_vertices(c) + 2)
+    poly_out = ConvexPolygon{T}(Corner[])
+    # sizehint!(poly_out.corners, nb_vertices(c) + 2)
+    previous_corner = c.corners[end]
+    for corner in c.corners
+        if corner[2] in h
+            if previous_corner[2] in h
+                # Stay in
+                push!(poly_in.corners, corner)
+            else
+                # Entering
+                p = corner_point(corner[1], h)
+                push!(poly_in.corners, (h, p, corner[3]))
+                push!(poly_in.corners, corner)
+                push!(poly_out.corners, (corner[1], p, h))
+            end
+        else
+            if previous_corner[2] in h
+                # Exiting
+                p = corner_point(corner[1], h)
+                push!(poly_in.corners, (corner[1], p, h))
+                push!(poly_out.corners, (h, p, corner[3]))
+                push!(poly_out.corners, corner)
+            else
+                # Stay out
+                push!(poly_out.corners, corner)
+            end
+        end
+        previous_corner = corner
     end
-    return Reunion{ConvexPolygon{T}}([poly_in]), Reunion{ConvexPolygon{T}}([poly_out])
+    poly_in, poly_out
 end
 
 function cut(c::ConvexPolygon{T}, i::Intersection{HalfPlane{T}}) where T
