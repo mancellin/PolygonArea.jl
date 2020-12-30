@@ -82,5 +82,12 @@ using PolygonArea: Reunion, Point, vertices, rotate, translate, square
         c = circle((0.5, 0.5), 0.4, 60) |> rotate(π/5, center=(0.5, 0.5))
         r = rectangle(0.45, 0.10, 0.46, 0.11)
         @test PolygonArea.area(r ∩ c) ≈ PolygonArea.area(c ∩ r) 
+
+        tri = PolygonArea.ConvexPolygon([(0.0, 0.0), (0.9, -0.9), (0.8, 0.6)])
+        rec = PolygonArea.ConvexPolygon([(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)])
+        inv_rec = PolygonArea.ConvexPolygon([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+        clipped = tri ∩ rec
+        @test !isempty(clipped)
+
     end
 end

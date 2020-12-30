@@ -7,9 +7,7 @@ struct HalfPlane{T} <: Surface
     c::T
 end
 
-
-function HalfPlane(p1, p2, side=:right)
-    T = eltype(p1)
+function HalfPlane{T}(p1::Point{T}, p2::Point{T}, side) where T
     a = - p2[2] + p1[2]
     b = + p2[1] - p1[1]
     c = - a*p1[1] - b*p1[2]
@@ -19,6 +17,7 @@ function HalfPlane(p1, p2, side=:right)
         HalfPlane{T}(-a, -b, -c)
     end
 end
+HalfPlane(p1, p2, side::Symbol=:right) = (T = eltype(p1); HalfPlane{T}(Point{T}(p1...), Point{T}(p2...), side))
 
 # POLAR COORDINATES
 # The line is defined in polar coordinates around the center (xc, yc).
@@ -54,9 +53,9 @@ rotate(h::HalfPlane, ϕ; center=Point(0.0, 0.0)) = PolarHalfPlane(signed_distanc
 invert(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
 exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
 
-function corner_point(h1::HalfPlane, h2::HalfPlane)
+function corner_point(h1::HalfPlane{T}, h2::HalfPlane{T}) where T
     idet = 1.0 / (h1.a * h2.b - h2.a * h1.b)
-    return ((-h2.b * h1.c + h1.b * h2.c) * idet, (-h1.a * h2.c + h2.a * h1.c) * idet)
+    return Point{T}((-h2.b * h1.c + h1.b * h2.c) * idet, (-h1.a * h2.c + h2.a * h1.c) * idet)
 end
 
 isempty(h::HalfPlane) = false

@@ -28,11 +28,11 @@ end
 
 function show(io::IO, p::ConvexPolygon{T}) where T
     padding = get(io, :padding, 0) + 2
-    print(io, "ConvexPolygon{$T} with $(length(p.corners)) corners\n")
-    for (i, c) in enumerate(p.corners)
+    print(io, "ConvexPolygon{$T} with $(nb_vertices(p)) vertices\n")
+    for (i, c) in enumerate(vertices(p))
         print(io, " "^padding)
-        print(Base.IOContext(io, :compact=>true, :padding=>padding), c[2])
-        i != length(p.corners) && print(io, "\n")
+        print(Base.IOContext(io, :compact=>true, :padding=>padding), c)
+        i != nb_vertices(p) && print(io, "\n")
     end
 end
 

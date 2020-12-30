@@ -5,14 +5,14 @@ using Base.Iterators: product
 struct Intersection{T <: Surface} <: Surface
     content::Vector{T}
 
-    function Intersection{T}(content) where T
-        content = unique(content)
-        if any(isempty(h) for h in content)
-            return new([])
-        else
-            return new(content)
-        end
-    end
+    # function Intersection{T}(content) where T
+    #     content = unique(content)
+    #     if any(isempty(h) for h in content)
+    #         return new([])
+    #     else
+    #         return new(content)
+    #     end
+    # end
 end
 
 struct Reunion{T <: Surface} <: Surface
@@ -31,6 +31,8 @@ isempty(u::Reunion) = all(isempty(h) for h in u.content)
 
 invert(i::Intersection) = foldl(union, (invert(h) for h in i.content))
 invert(u::Reunion) = foldl(intersect, (invert(h) for h in u.content))
+
+\(c1::Surface, c2::Surface) where T = c1 ∩ invert(c2)
 
 # Union and intersection of half planes
 

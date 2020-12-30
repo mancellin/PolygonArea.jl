@@ -101,10 +101,10 @@ using StaticArrays
         @test !(Point(-1, 1) in union(inferior_hp, right_hp))
         @test (Point(1, 1) in union(inferior_hp, right_hp))
 
-        @test corner_point(HalfPlane(0.0, 1.0, 0.0), HalfPlane(-1.0, 0.0, 0.0)) == (0.0, 0.0)
-        @test corner_point(HalfPlane(1.0, 0.0, 1.0), HalfPlane(0.0, -1.0, 0.5)) == (-1.0, 0.5)
-        @test corner_point(PolarHalfPlane(0.0, 0.0), HalfPlane(0.0, 1.0, -1.0)) == (0.0, 1.0)
-        @test corner_point(PolarHalfPlane(-1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == (1.0, 1.5)
+        @test corner_point(HalfPlane(0.0, 1.0, 0.0), HalfPlane(-1.0, 0.0, 0.0)) == [0.0, 0.0]
+        @test corner_point(HalfPlane(1.0, 0.0, 1.0), HalfPlane(0.0, -1.0, 0.5)) == [-1.0, 0.5]
+        @test corner_point(PolarHalfPlane(0.0, 0.0), HalfPlane(0.0, 1.0, -1.0)) == [0.0, 1.0]
+        @test corner_point(PolarHalfPlane(-1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == [1.0, 1.5]
 
         # Union and intersection
         h1 = HalfPlane(1.0, 0.0, 0.0)

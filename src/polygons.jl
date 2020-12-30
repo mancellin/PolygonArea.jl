@@ -2,122 +2,24 @@
 #  Polygons  #
 ##############
 
-const Corner{T} = Tuple{HalfPlane{T}, Point{T}, HalfPlane{T}}
-
-Corner(p1, p2, p3) = (HalfPlane(p1, p2), p2, HalfPlane(p2, p3))
-
 struct ConvexPolygon{T} <: Surface
-    corners::Vector{Corner{T}}
+    vertices::Vector{SVector{2, T}}
 end
 
-function ConvexPolygon(ps...)
-    n = length(ps)
-    corners = []
-    for i in 1:n
-        im1 = mod(i - 1, Base.OneTo(n))
-        ip1 = mod(i + 1, Base.OneTo(n))
-        push!(corners, Corner(ps[im1], ps[i], ps[ip1]))
-    end
-    return ConvexPolygon{eltype(ps[1])}(corners)
-end
+ConvexPolygon(v::Vector{Tuple{T, T}}) where T = ConvexPolygon{T}([SVector(i1, i2) for (i1, i2) in v])
 
-convert(::Type{Intersection{HalfPlane{T}}}, p::ConvexPolygon{T}) where T = Intersection{HalfPlane{T}}([c[1] for c in p.corners])
-convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, c::ConvexPolygon{T}) where T = convert(Reunion{Intersection{HalfPlane{T}}}, convert(Intersection{HalfPlane{T}}, c))
+nb_vertices(p::ConvexPolygon) = length(p.vertices)
+nb_sides(p::ConvexPolygon) = length(p.vertices)
 
-nb_vertices(p::ConvexPolygon) = length(p.corners)
-nb_sides(p::ConvexPolygon) = length(p.corners)
+==(p1::ConvexPolygon, p2::ConvexPolygon) = nb_sides(p1) == nb_sides(p2) && all(p1.vertices .== p2.vertices)
 
-==(c1::ConvexPolygon, c2::ConvexPolygon) = nb_sides(c1) == nb_sides(c2) && all(c1.corners .== c2.corners)
-
-vertices(p::ConvexPolygon) = [c[2] for c in p.corners]
+vertices(p::ConvexPolygon) = p.vertices
 sides(p::ConvexPolygon) = [c[1] for c in p.corners]
 
-isempty(p::ConvexPolygon) = length(p.corners) <= 2
+isempty(p::ConvexPolygon) = length(p.vertices) <= 2
 
-in(p, c::ConvexPolygon{T}) where T = in(p, convert(Intersection{HalfPlane{T}}, c))
-
-translate(c::Corner, v) = map(x -> translate(x, v), c)
-translate(c::ConvexPolygon{T}, v) where T = ConvexPolygon{T}(map(x -> translate(x, v), c.corners))
-
-rotate(c::Corner, ϕ; kw...) = map(x -> rotate(x, ϕ; kw...), c)
-rotate(c::ConvexPolygon{T}, ϕ; kw...) where T = ConvexPolygon{T}(map(x -> rotate(x, ϕ; kw...), c.corners))
-
-invert(c::ConvexPolygon{T}) where T = invert(convert(Intersection{HalfPlane{T}}, c))
-
-"""Returns the couple of ConvexPolygon obtained by cutting c by the plane h."""
-function cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T
-    poly_in = ConvexPolygon{T}(Corner[])
-    # sizehint!(poly_in.corners, nb_vertices(c) + 2)
-    poly_out = ConvexPolygon{T}(Corner[])
-    # sizehint!(poly_out.corners, nb_vertices(c) + 2)
-    previous_corner = c.corners[end]
-    for corner in c.corners
-        if corner[2] in h
-            if previous_corner[2] in h
-                # Stay in
-                push!(poly_in.corners, corner)
-            else
-                # Entering
-                p = corner_point(corner[1], h)
-                push!(poly_in.corners, (h, p, corner[3]))
-                push!(poly_in.corners, corner)
-                push!(poly_out.corners, (corner[1], p, h))
-            end
-        else
-            if previous_corner[2] in h
-                # Exiting
-                p = corner_point(corner[1], h)
-                push!(poly_in.corners, (corner[1], p, h))
-                push!(poly_out.corners, (h, p, corner[3]))
-                push!(poly_out.corners, corner)
-            else
-                # Stay out
-                push!(poly_out.corners, corner)
-            end
-        end
-        previous_corner = corner
-    end
-    poly_in, poly_out
-end
-
-function cut(c::ConvexPolygon{T}, i::Intersection{HalfPlane{T}}) where T
-    rests = Reunion{ConvexPolygon{T}}([])
-    cc = Reunion{ConvexPolygon{T}}([c])
-	for h in i.content
-		cc, rest = cut(cc, h)
-		rests = rests ∪ rest
-		if isempty(cc)
-			break
-		end
-	end
-    return cc, rests
-end
-
-function cut(c::ConvexPolygon{T}, u::Reunion{HalfPlane{T}}) where T
-    cut(c, convert(Reunion{Intersection{HalfPlane{T}}}, u))
-end
-
-function cut(c::ConvexPolygon{T}, u::Reunion{Intersection{HalfPlane{T}}}) where T
-    polys = Reunion{ConvexPolygon{T}}([])
-    cc = Reunion{ConvexPolygon{T}}([c])
-    for i in u.content
-        poly, cc = cut(cc, i)
-		polys = polys ∪ poly
-		if isempty(c)
-			break
-		end
-    end
-    return polys, cc
-end
-
-intersect(c::ConvexPolygon{T}, h::HalfPlane{T}) where T = cut(c, h)[1]
-intersect(c::ConvexPolygon{T}, i::Intersection{HalfPlane{T}}) where T = cut(c, i)[1]
-intersect(c1::ConvexPolygon{T}, c2::ConvexPolygon{T})  where T = intersect(c1, convert(Intersection{HalfPlane{T}}, c2))
-
-intersect(c::ConvexPolygon{T}, u::Reunion{HalfPlane{T}})  where T = cut(c, u)[1]
-intersect(c::ConvexPolygon{T}, ui::Reunion{Intersection{HalfPlane{T}}}) where T = cut(c, ui)[1]
-
-intersect(s::Surface, c::ConvexPolygon) = intersect(c, s)
+translate(c::ConvexPolygon{T}, v) where T = ConvexPolygon{T}(map(x -> translate(x, v), c.vertices))
+rotate(c::ConvexPolygon{T}, ϕ; kw...) where T = ConvexPolygon{T}(map(x -> rotate(x, ϕ; kw...), c.vertices))
 
 function area(c::ConvexPolygon)
 	if isempty(c)
@@ -126,11 +28,69 @@ function area(c::ConvexPolygon)
 		v = vertices(c)
 		x = [xy[1] for xy in v]
 		y = [xy[2] for xy in v]
+        # Shoelace formula
 		return abs(  sum(x[1:end-1] .* y[2:end]) + x[end]*y[1]
 				   - sum(x[2:end] .* y[1:end-1]) - x[1]*y[end]
 				  )/2
 	end
 end
+
+# REPRESENTATION AS INTERSECTION OF HALF-PLANES
+
+function convert(::Type{Intersection{HalfPlane{T}}}, p::ConvexPolygon{T}) where T
+    if isempty(p); return Intersection{HalfPlane{T}}(HalfPlane{T}[]); end
+    half_planes = Intersection{HalfPlane{T}}(Vector{HalfPlane{T}}(undef, nb_sides(p)))
+    last_i = nb_vertices(p)
+    for i in 1:nb_vertices(p)
+        half_planes.content[i] = HalfPlane{T}(p.vertices[last_i], p.vertices[i], :right)
+        last_i = i
+    end
+    return half_planes
+end
+convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, c::ConvexPolygon{T}) where T = convert(Reunion{Intersection{HalfPlane{T}}}, convert(Intersection{HalfPlane{T}}, c))
+
+in(p, c::ConvexPolygon{T}) where T = in(p, convert(Intersection{HalfPlane{T}}, c))
+invert(c::ConvexPolygon{T}) where T = invert(convert(Intersection{HalfPlane{T}}, c))
+
+# INTERSECTIONS BETWEEN CONVEX POLYGONS
+
+# Basically Sutherland-Hodgeman algorithm
+function intersect(c::ConvexPolygon{T}, h::HalfPlane{T}) where T
+    if isempty(c); return c; end
+    poly_in = ConvexPolygon{T}(Point{T}[])
+    previous_corner = c.vertices[end]
+    for corner in c.vertices
+        if corner in h
+            if previous_corner in h
+                # Stay in
+                push!(poly_in.vertices, corner)
+            else
+                # Entering
+                push!(poly_in.vertices, corner_point(HalfPlane{T}(previous_corner, corner, :right), h))
+                push!(poly_in.vertices, corner)
+            end
+        elseif previous_corner in h
+                # Exiting
+                push!(poly_in.vertices, corner_point(HalfPlane{T}(previous_corner, corner, :right), h))
+        end
+        previous_corner = corner
+    end
+    return poly_in
+end
+intersect(h::HalfPlane{T}, c::ConvexPolygon{T}) where T = intersect(c, h)
+
+function intersect(c::ConvexPolygon{T}, ih::Intersection{HalfPlane{T}}) where T
+	for h in ih.content
+		c = c ∩ h
+		if isempty(c)
+			break
+		end
+	end
+    return c
+end
+intersect(ih::Intersection{HalfPlane{T}}, c::ConvexPolygon{T}) where T = intersect(c, ih)
+
+intersect(c1::ConvexPolygon{T}, c2::ConvexPolygon{T})  where T = intersect(c1, convert(Intersection{HalfPlane{T}}, c2))
 
 # REUNION OF CONVEX POLYGONS
 
@@ -139,36 +99,75 @@ convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{ConvexPolygon{T}
 
 promote_rule(::Type{ConvexPolygon{T}}, ::Type{Reunion{ConvexPolygon{T}}}) where T = Reunion{ConvexPolygon{T}}
 
-function cut(cs::Reunion{ConvexPolygon{T}}, h) where T
-    polys = Reunion{ConvexPolygon{T}}([])
-    rests = Reunion{ConvexPolygon{T}}([])
-    for c in cs.content
-        poly, rest = cut(c, h)
-        polys = polys ∪ poly
-        rests = rests ∪ rest
-    end
-    return polys, rests
+invert(c::Reunion{ConvexPolygon{T}}) where T = invert(convert(Reunion{Intersection{HalfPlane{T}}}, c))
+
+# _cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T = (c ∩ h, c ∩ invert(h))
+# function _cut(c::ConvexPolygon{T}, ih::Intersection{HalfPlane{T}}) where T
+# 	for h in ih.content
+#         c, rest = _cut(c, h)
+# 		if isempty(c)
+# 			break
+# 		end
+# 	end
+#     return c
+#     (c ∩ h, c ∩ invert(h))
+# end
+
+function intersect(c::ConvexPolygon{T}, uh::Reunion{HalfPlane{T}}) where T
+    u_poly = Reunion{ConvexPolygon{T}}(ConvexPolygon{T}[])
+    rest = c
+	for h in uh.content
+        ci = rest ∩ h
+        rest = rest ∩ invert(h)
+        if !isempty(ci)
+            push!(u_poly.content, ci)
+        end
+	end
+    return u_poly
 end
+intersect(uh::Reunion{HalfPlane{T}}, c::ConvexPolygon{T}) where T = intersect(c, uh)
+
+function intersect(c::ConvexPolygon{T}, uih::Reunion{Intersection{HalfPlane{T}}}) where T
+    u_poly = Reunion{ConvexPolygon{T}}(ConvexPolygon{T}[])
+    rest = c
+	for ih in uih.content
+        ci = rest ∩ ih
+        rest = rest ∩ invert(ih)
+        if !isempty(ci)
+            u_poly = u_poly ∪ ci
+        end
+	end
+    return u_poly
+end
+intersect(uih::Reunion{Intersection{HalfPlane{T}}}, c::ConvexPolygon{T}) where T = intersect(c, uih)
+
+function intersect(uc::Reunion{ConvexPolygon{T}}, s::Surface) where T
+    u_poly = Reunion{ConvexPolygon{T}}(ConvexPolygon{T}[])
+    for ci in uc.content
+        cii = ci ∩ s
+		if !isempty(cii)
+            u_poly = u_poly ∪ cii
+		end
+    end
+    return u_poly
+end
+intersect(s::Surface, uc::Reunion{ConvexPolygon{T}}) where T = intersect(uc, s)
+intersect(uc1::Reunion{ConvexPolygon{T}}, uc2::Reunion{ConvexPolygon{T}}) where T = intersect(uc1, convert(Reunion{Intersection{HalfPlane{T}}}, uc2))
 
 union(c1::ConvexPolygon{T}, c2::ConvexPolygon{T}) where T = Reunion{ConvexPolygon{T}}([c1, c2])
 union(u1::Reunion{ConvexPolygon{T}}, u2::Reunion{ConvexPolygon{T}}) where T = Reunion{ConvexPolygon{T}}(vcat(u1.content, u2.content))
 
-intersect(u::Reunion{ConvexPolygon{T}}, c::ConvexPolygon{T}) where T = intersect(u, convert(Intersection{HalfPlane{T}}, c))
-intersect(u1::Reunion{ConvexPolygon{T}}, u2::Reunion{ConvexPolygon{T}}) where T = intersect(u1, convert(Reunion{Intersection{HalfPlane{T}}}, u2))
-intersect(u::Reunion{ConvexPolygon{T}}, h::Surface) where T = foldl(union, (p ∩ h for p in u.content))
-intersect(h::Surface, u::Reunion{ConvexPolygon{T}}) where T = intersect(u, h)
 
-invert(c::Reunion{ConvexPolygon{T}}) where T = invert(convert(Reunion{Intersection{HalfPlane{T}}}, c))
-
-const Polygons{T} = Union{ConvexPolygon{T}, Reunion{ConvexPolygon{T}}}
-\(c1::Polygons{T}, c2::Polygons{T}) where T = c1 ∩ invert(c2)
-
+# AREA OF REUNION OF CONVEX POLYGON
 disjoint(c::ConvexPolygon) = c
 function disjoint(u::Reunion{ConvexPolygon{T}}) where T
     isempty(u) && return u
-    l = u.content[1]
+    l = Reunion{ConvexPolygon{T}}(ConvexPolygon{T}[u.content[1]])
     for c in u.content[2:end]
-        l = l ∪ (c \ l)
+        rest = c \ l
+        if !isempty(rest)
+            l = l ∪ rest
+        end
     end
     return l
 end
