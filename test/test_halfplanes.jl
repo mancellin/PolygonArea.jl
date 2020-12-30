@@ -1,9 +1,8 @@
 using Test
 using PolygonArea
-using PolygonArea: PolarHalfPlane, Point, corner, Intersection, Reunion
+using PolygonArea: PolarHalfPlane, Point, corner_point, Intersection, Reunion
 using PolygonArea: signed_distance, distance, outward_normal, angle
 using PolygonArea: rotate, translate, distance, exchange_x_and_y
-using PolygonArea: corner
 using StaticArrays
 
 @testset "Half-planes" begin
@@ -102,10 +101,10 @@ using StaticArrays
         @test !(Point(-1, 1) in union(inferior_hp, right_hp))
         @test (Point(1, 1) in union(inferior_hp, right_hp))
 
-        @test corner(HalfPlane(0.0, 1.0, 0.0), HalfPlane(-1.0, 0.0, 0.0)) == Point(0.0, 0.0)
-        @test corner(HalfPlane(1.0, 0.0, 1.0), HalfPlane(0.0, -1.0, 0.5)) == Point(-1.0, 0.5)
-        @test corner(PolarHalfPlane(0.0, 0.0), HalfPlane(0.0, 1.0, -1.0)) == Point(0.0, 1.0)
-        @test corner(PolarHalfPlane(-1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == Point(1.0, 1.5)
+        @test corner_point(HalfPlane(0.0, 1.0, 0.0), HalfPlane(-1.0, 0.0, 0.0)) == (0.0, 0.0)
+        @test corner_point(HalfPlane(1.0, 0.0, 1.0), HalfPlane(0.0, -1.0, 0.5)) == (-1.0, 0.5)
+        @test corner_point(PolarHalfPlane(0.0, 0.0), HalfPlane(0.0, 1.0, -1.0)) == (0.0, 1.0)
+        @test corner_point(PolarHalfPlane(-1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == (1.0, 1.5)
 
         # Union and intersection
         h1 = HalfPlane(1.0, 0.0, 0.0)

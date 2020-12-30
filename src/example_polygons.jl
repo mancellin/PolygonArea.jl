@@ -25,9 +25,9 @@ function circle(center, radius::Real, nb_sides::Int)
     end
     polygon = Corner{Float64}[]
     for i in 1:(nb_sides-1)
-        push!(polygon, (sides[i], corner(sides[i], sides[i+1]), sides[i+1]))
+        push!(polygon, (sides[i], corner_point(sides[i], sides[i+1]), sides[i+1]))
     end
-    push!(polygon, (sides[end], corner(sides[end], sides[1]), sides[1]))
+    push!(polygon, (sides[end], corner_point(sides[end], sides[1]), sides[1]))
     return ConvexPolygon{Float64}(polygon)
 end
 

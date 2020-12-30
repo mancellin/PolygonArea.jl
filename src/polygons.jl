@@ -45,7 +45,7 @@ rotate(c::ConvexPolygon{T}, ϕ; kw...) where T = ConvexPolygon{T}(map(x -> rotat
 invert(c::ConvexPolygon{T}) where T = invert(convert(Intersection{HalfPlane{T}}, c))
 
 function cut(e::HalfPlane, h::HalfPlane)
-	new_vertex = corner(e, h)
+	new_vertex = corner_point(e, h)
     return ((e, new_vertex, h), (invert(h), new_vertex, e))
 end
 
