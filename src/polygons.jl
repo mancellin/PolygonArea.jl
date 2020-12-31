@@ -21,17 +21,18 @@ isempty(p::ConvexPolygon) = length(p.vertices) <= 2
 translate(c::ConvexPolygon{T}, v) where T = ConvexPolygon{T}(map(x -> translate(x, v), c.vertices))
 rotate(c::ConvexPolygon{T}, ϕ; kw...) where T = ConvexPolygon{T}(map(x -> rotate(x, ϕ; kw...), c.vertices))
 
-function area(c::ConvexPolygon)
+function area(c::ConvexPolygon{T}) where T
 	if isempty(c)
-		return 0.0
+        return zero(T)*zero(T)
 	else
-		v = vertices(c)
-		x = [xy[1] for xy in v]
-		y = [xy[2] for xy in v]
         # Shoelace formula
-		return abs(  sum(x[1:end-1] .* y[2:end]) + x[end]*y[1]
-				   - sum(x[2:end] .* y[1:end-1]) - x[1]*y[end]
-				  )/2
+        a = zero(T)
+        last_vertex = c.vertices[end]
+        for vertex in c.vertices
+            a += last_vertex[1] * vertex[2] - last_vertex[2] * vertex[1]
+            last_vertex = vertex
+        end
+        return abs(a)/2
 	end
 end
 
@@ -171,5 +172,5 @@ function disjoint(u::Reunion{ConvexPolygon{T}}) where T
     end
     return l
 end
-area(u::Reunion{ConvexPolygon{T}}) where T = isempty(u) ? 0.0 : sum(area(c) for c in u.content)
+area(u::Reunion{ConvexPolygon{T}}) where T = isempty(u) ? zero(T)*zero(T) : sum(area(c) for c in u.content)
 
