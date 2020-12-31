@@ -6,6 +6,7 @@ struct ConvexPolygon{T} <: Surface
     vertices::Vector{SVector{2, T}}
 end
 
+ConvexPolygon(v::Vector{Point{T}}) where T = ConvexPolygon{T}(v)
 ConvexPolygon(v::Vector{Tuple{T, T}}) where T = ConvexPolygon{T}([SVector(i1, i2) for (i1, i2) in v])
 
 nb_vertices(p::ConvexPolygon) = length(p.vertices)
@@ -26,7 +27,7 @@ function area(c::ConvexPolygon{T}) where T
         return zero(T)*zero(T)
 	else
         # Shoelace formula
-        a = zero(T)
+        a = zero(T)*zero(T)
         last_vertex = c.vertices[end]
         for vertex in c.vertices
             a += last_vertex[1] * vertex[2] - last_vertex[2] * vertex[1]

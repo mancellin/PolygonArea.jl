@@ -90,4 +90,9 @@ using PolygonArea: Reunion, Point, vertices, rotate, translate, square
         @test !isempty(clipped)
 
     end
+
+    @testset "Generic programming" begin
+        using Unitful: m
+        @test area(PolygonArea.ConvexPolygon([(1m, 0m), (1m, 1m), (0m, 1m), (0m, 0m)])) == 1m^2
+    end
 end
