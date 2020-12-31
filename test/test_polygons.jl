@@ -1,12 +1,12 @@
 using Test
 using StaticArrays
 using PolygonArea
-using PolygonArea: Reunion, Point, vertices, rotate, translate, square
+using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, translate, square
 
 @testset "Polygons" begin
 
     @testset "creation and contained points" begin
-        unit_square = square((0, 0), 1)
+        unit_square = square((0.0, 0.0), 1.0)
         @test Point(0.5, 0.5) in unit_square
         @test Point(1.0, 1.0) in unit_square
         @test !(Point(1.2, 1.0) in unit_square)
@@ -14,11 +14,18 @@ using PolygonArea: Reunion, Point, vertices, rotate, translate, square
         @test Point(1.0, 0.0) in vertices(unit_square)
         @test !(Point(0.5, 0.5) in vertices(unit_square))
             
-        @test unit_square == rectangle(bottom_left=(0, 0), top_right=(1, 1))
-        @test unit_square == rectangle(bottom_left=(0, 0), top_right=(1, 1))
-        @test unit_square == rectangle((0, 0), (1, 1))
+        @test unit_square == rectangle(bottom_left=(0.0, 0.0), top_right=(1.0, 1.0))
+        @test unit_square == rectangle(bottom_left=(0.0, 0.0), top_right=(1.0, 1.0))
+        @test unit_square == rectangle((0.0, 0.0), (1.0, 1.0))
 
         @test !(PolygonArea.ConvexPolygon{Int}([]) == square((1, 1), 1))
+
+        rec = PolygonArea.ConvexPolygon([(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)])
+        @test (0.5, 0.5) ∈ rec
+
+        # Should return an error...
+        inv_rec = PolygonArea.ConvexPolygon([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
+        @test !((0.5, 0.5) ∈ inv_rec)
     end
 
     @testset "properties" begin
@@ -39,37 +46,51 @@ using PolygonArea: Reunion, Point, vertices, rotate, translate, square
     end
 
     @testset "union and intersection" begin
-        unit_square = rectangle(0.0, 0.0, 1.0, 1.0)
-        top_right_hp = HalfPlane(1.0, 1.0, -1.5)
-        c1 = unit_square ∩ top_right_hp  # Cut the top-right corner
+        # Intersection with HalfPlane
+        unit_square = square((0.0, 0.0), 1.0)
+        hp = HalfPlane(1.0, 1.0, -1.5)
+        c1 = unit_square ∩ hp  # Cut the top-right corner
         @test Point(0.5, 0.5) in c1
         @test !(Point(0.9, 0.9) in c1)
 
-        c2 = unit_square ∩ invert(top_right_hp)  # Keep only the top-right corner
+        c2 = unit_square ∩ invert(hp)  # Keep only the top-right corner
         @test !(Point(0.5, 0.5) in c2)
         @test Point(0.9, 0.9) in c2
 
-        square((0.0, 0.0), 1.0) ∩ HalfPlane(1.0, 0.0, -0.5)
-        square((0.0, 0.0), 1.0) ∩ (HalfPlane(1.0, 0.0, -0.5) ∩ HalfPlane(0.0, 1.0, -0.5))
-        square((0.0, 0.0), 1.0) ∩ (HalfPlane(1.0, 0.0, -0.5) ∪ HalfPlane(0.0, 1.0, -0.5))
-
         @test area(c1) + area(c2) ≈ area(unit_square)
+
+        # Intersection with union and intersection of HalfPlanes
+        left = HalfPlane(1.0, 0.0, -0.5)
+        top = HalfPlane(0.0, 1.0, -0.5)
+        top_left = top ∩ left
+        bottom_right = invert(top) ∩ invert(left)
+        @test bottom_right == invert(top ∪ left)
+        @test (unit_square ∩ left) ∩ top == unit_square ∩ (left ∩ top)
+
+        @test area(unit_square ∩ left) == 0.5
+        @test area((unit_square ∩ left) ∩ top) == 0.25
+        @test area(unit_square ∩ (top ∪ left)) == 0.75
+
+        @test area(unit_square ∩ (bottom_right ∪ top_left)) ≈ 0.5
+        @test area(unit_square ∩ (bottom_right ∩ top_left)) ≈ 0.0
 
         @test (square((0.0, 0.0), 1.0) |> invert |> typeof) == Reunion{HalfPlane{Float64}}
         @test area(square((0.0, 0.0), 3.0) \ square((1.0, 1.0), 1.0)) == 8.0
 
-        top = PolarHalfPlane(0.0, 3π/2, center=Point(0.5, 0.5))
-        left = PolarHalfPlane(0.0, 0.0, center=Point(0.5, 0.5))
-        topleft = top ∩ left
-        bottomright = invert(top) ∩ invert(left)
-        mask = topleft ∪ bottomright
-        unit_square ∩ mask
+        # Intersection with ConvexPolygon
+        @test area(unit_square ∩ square((0.0, 0.5), 1.0)) == 0.5
+        @test area(unit_square ∩ square((0.5, 0.5), 1.0)) == 0.25
 
+        triangle = ConvexPolygon([(0.0, 0.0), (0.5, 1.0), (1.0, 0.0)])
+        @test area(unit_square ∩ triangle) == area(triangle)
+       
+        # Intersection with union of ConvexPolygon
         r1 = rectangle(0.0, 0.0, 2.0, 2.0)
         r2 = rectangle(1.0, 1.0, 2.0, 2.0)
         r3 = rectangle(1.5, 1.5, 2.5, 2.5)
-        (unit_square ∪ r2) ∩ (r1 ∪ r3)
+        @test area((unit_square ∪ r2) ∩ (r1 ∪ r3)) == 2.0
 
+        # Disjoint union
         c = circle(0.0, 0.0, 1.0, 10)
         @test PolygonArea.disjoint(c) == c
 
@@ -83,15 +104,9 @@ using PolygonArea: Reunion, Point, vertices, rotate, translate, square
         r = rectangle(0.45, 0.10, 0.46, 0.11)
         @test PolygonArea.area(r ∩ c) ≈ PolygonArea.area(c ∩ r) 
 
-        tri = PolygonArea.ConvexPolygon([(0.0, 0.0), (0.9, -0.9), (0.8, 0.6)])
-        rec = PolygonArea.ConvexPolygon([(0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)])
-        inv_rec = PolygonArea.ConvexPolygon([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)])
-        clipped = tri ∩ rec
-        @test !isempty(clipped)
-
     end
 
-    @testset "Generic programming" begin
+    @testset "generic programming" begin
         using Unitful: m
         @test area(PolygonArea.ConvexPolygon([(1m, 0m), (1m, 1m), (0m, 1m), (0m, 0m)])) == 1m^2
     end

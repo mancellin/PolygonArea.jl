@@ -9,9 +9,8 @@ import Base.union, Base.intersect, Base.\
 import Base.convert, Base.promote_rule
 import Base.show
 
-export HalfPlane, PolarHalfPlane
-export invert, area
-export rectangle, circle
+export HalfPlane, ConvexPolygon
+export rectangle, circle, area
 
 # TYPES
 abstract type Surface end

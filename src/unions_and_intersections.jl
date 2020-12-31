@@ -15,6 +15,8 @@ struct Intersection{T <: Surface} <: Surface
     # end
 end
 
+==(i1::Intersection, i2::Intersection) = all(h1 == h2 for (h1, h2) in zip(i1.content, i2.content))
+
 struct Reunion{T <: Surface} <: Surface
     content::Vector{T}
 
@@ -23,8 +25,8 @@ end
 
 # Generic fonctions
 
-in(p::Point, i::Intersection) = all((p in h) for h in i.content)
-in(p::Point, u::Reunion) = any((p in h) for h in u.content)
+in(p, i::Intersection) = all((p in h) for h in i.content)
+in(p, u::Reunion) = any((p in h) for h in u.content)
 
 isempty(i::Intersection) = any(isempty(h) for h in i.content)
 isempty(u::Reunion) = all(isempty(h) for h in u.content)

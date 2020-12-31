@@ -6,7 +6,6 @@ struct ConvexPolygon{T} <: Surface
     vertices::Vector{SVector{2, T}}
 end
 
-ConvexPolygon(v::Vector{Point{T}}) where T = ConvexPolygon{T}(v)
 ConvexPolygon(v::Vector{Tuple{T, T}}) where T = ConvexPolygon{T}([SVector(i1, i2) for (i1, i2) in v])
 
 nb_vertices(p::ConvexPolygon) = length(p.vertices)

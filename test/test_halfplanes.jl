@@ -2,7 +2,7 @@ using Test
 using PolygonArea
 using PolygonArea: PolarHalfPlane, Point, corner_point, Intersection, Reunion
 using PolygonArea: signed_distance, distance, outward_normal, angle
-using PolygonArea: rotate, translate, distance, exchange_x_and_y
+using PolygonArea: invert, rotate, translate, distance, exchange_x_and_y
 using StaticArrays
 
 @testset "Half-planes" begin
@@ -13,6 +13,8 @@ using StaticArrays
 
         @test HalfPlane(1, 0, 0) isa HalfPlane{Int}
         @test HalfPlane{Float64}(1, 0, 0) isa HalfPlane{Float64}
+
+        @test HalfPlane((0.0, 0.0), (1.0, 0.0)) ≈ HalfPlane(0.0, 1.0, 0.0)
 
         @test HalfPlane(1.0, 0.0, 0.0) == HalfPlane(1.0, 0.0, 0.0)
         @test HalfPlane(1.0, 0.0, 0.0) != HalfPlane(1.0, 1e-15, 0.0)
@@ -26,6 +28,9 @@ using StaticArrays
         @test !(Point(0, 1)  in HalfPlane(0, 1, 0))
         @test Point(1, 0)    in HalfPlane(-1, 0, 0)
         @test !(Point(-1, 0) in HalfPlane(-1, 0, 0))
+
+        @test (-1.0, -1.0) ∈ HalfPlane((0.0, 0.0), (1.0, 0.0), :right)
+        @test (1.0, 1.0) ∈ HalfPlane((0.0, 0.0), (1.0, 0.0), :left)
 
         @test Point(0.5, 0.5) in PolarHalfPlane(-1.0, 0π)
         @test (0.5, 0.5) in PolarHalfPlane(-1.0, 0π)
@@ -101,10 +106,10 @@ using StaticArrays
         @test !(Point(-1, 1) in union(inferior_hp, right_hp))
         @test (Point(1, 1) in union(inferior_hp, right_hp))
 
-        @test corner_point(HalfPlane(0.0, 1.0, 0.0), HalfPlane(-1.0, 0.0, 0.0)) == [0.0, 0.0]
-        @test corner_point(HalfPlane(1.0, 0.0, 1.0), HalfPlane(0.0, -1.0, 0.5)) == [-1.0, 0.5]
-        @test corner_point(PolarHalfPlane(0.0, 0.0), HalfPlane(0.0, 1.0, -1.0)) == [0.0, 1.0]
-        @test corner_point(PolarHalfPlane(-1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == [1.0, 1.5]
+        @test corner_point(HalfPlane(0.0, 1.0, 0.0), HalfPlane(-1.0, 0.0, 0.0)) == Point(0.0, 0.0)
+        @test corner_point(HalfPlane(1.0, 0.0, 1.0), HalfPlane(0.0, -1.0, 0.5)) == Point(-1.0, 0.5)
+        @test corner_point(PolarHalfPlane(0.0, 0.0), HalfPlane(0.0, 1.0, -1.0)) == Point(0.0, 1.0)
+        @test corner_point(PolarHalfPlane(-1.0, π/2, center=Point(0.5, 0.5)), HalfPlane(1.0, 0.0, -1.0)) == Point(1.0, 1.5)
 
         # Union and intersection
         h1 = HalfPlane(1.0, 0.0, 0.0)
