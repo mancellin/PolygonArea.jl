@@ -104,6 +104,13 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, tra
         r = rectangle(0.45, 0.10, 0.46, 0.11)
         @test PolygonArea.area(r ∩ c) ≈ PolygonArea.area(c ∩ r) 
 
+        # 
+        horizontal_rectangle = PolygonArea.rectangle((0.4, 0.2), (0.6, 0.8))
+        vertical_rectangle = PolygonArea.rectangle((0.2, 0.4), (0.8, 0.6))
+        cross = horizontal_rectangle ∪ vertical_rectangle
+        circ = PolygonArea.circle(0.5, 0.5, 0.35, 100)
+        diff = circ \ cross
+        @test area(diff) ≈ area(circ) - area(PolygonArea.disjoint(cross))
     end
 
     @testset "generic programming" begin

@@ -34,7 +34,8 @@ isempty(u::Reunion) = all(isempty(h) for h in u.content)
 invert(i::Intersection) = foldl(union, (invert(h) for h in i.content))
 invert(u::Reunion) = foldl(intersect, (invert(h) for h in u.content))
 
-\(c1::Surface, c2::Surface) where T = c1 ∩ invert(c2)
+\(c1::Surface, c2::Surface) = c1 ∩ invert(c2)
+\(c1::Surface, u2::Reunion) = foldl(\, u2.content, init=c1)
 
 # Union and intersection of half planes
 
