@@ -7,6 +7,7 @@ function rectangle(x0::T, y0::T, x1::T, y1::T) where T
     topleft_corner = Point{T}(x0, y1)
     ConvexPolygon{T}([bottomleft_corner, topleft_corner, topright_corner, bottomright_corner])
 end
+rectangle(x0, y0, x1, y1) = rectangle(promote(x0, y0, x1, y1)...)
 rectangle(bottom_left, top_right) = rectangle(bottom_left[1], bottom_left[2], top_right[1], top_right[2])
 rectangle(; bottom_left, top_right) = rectangle(bottom_left, top_right)
 
