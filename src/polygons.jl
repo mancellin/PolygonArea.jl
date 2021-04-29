@@ -20,6 +20,7 @@ isempty(p::ConvexPolygon) = length(p.vertices) <= 2
 
 translate(c::ConvexPolygon{T}, v) where T = ConvexPolygon{T}(map(x -> translate(x, v), c.vertices))
 rotate(c::ConvexPolygon{T}, ϕ; kw...) where T = ConvexPolygon{T}(map(x -> rotate(x, ϕ; kw...), c.vertices))
+scale(c::ConvexPolygon{T}, λ, center=Point(0.0, 0.0)) where T = ConvexPolygon{T}(map(x -> λ*(x.-center) .+ center, c.vertices))
 
 function area(c::ConvexPolygon{T}) where T
 	if isempty(c)

@@ -1,7 +1,7 @@
 using Test
 using StaticArrays
 using PolygonArea
-using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, translate, square
+using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, translate, scale, square
 
 @testset "Polygons" begin
 
@@ -43,6 +43,10 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, tra
         @test Point(0.0, 1.2) in translate(rectangle(0.0, 0.0, 1.0, 1.0), SVector(-0.3, 0.5))
         @test Point(0.0, 1.2) in translate(rectangle(0.0, 0.0, 1.0, 1.0), [-0.3, 0.5])
         @test Point(0.0, 1.2) in translate(rectangle(0.0, 0.0, 1.0, 1.0), (-0.3, 0.5))
+        @test Point(1.5, 1.5) in scale(rectangle(0.0, 0.0, 1.0, 1.0), 1.5)
+        @test !(Point(1.5, 1.5) in scale(rectangle(0.0, 0.0, 1.0, 1.0), 1.5, (1.0, 1.0)))
+        λ = rand()
+        @test area(scale(rectangle(0.0, 0.0, 1.0, 1.0), λ)) ≈ λ^2*area(rectangle(0.0, 0.0, 1.0, 1.0)) 
     end
 
     @testset "union and intersection" begin
