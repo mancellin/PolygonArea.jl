@@ -54,7 +54,7 @@ complement(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
 exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
 
 function corner_point(h1::HalfPlane{T}, h2::HalfPlane{T}) where T
-    idet = 1.0 / (h1.a * h2.b - h2.a * h1.b)
+    idet = one(T) / (h1.a * h2.b - h2.a * h1.b)
     return Point{T}((-h2.b * h1.c + h1.b * h2.c) * idet, (-h1.a * h2.c + h2.a * h1.c) * idet)
 end
 
