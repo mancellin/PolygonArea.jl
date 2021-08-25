@@ -1,7 +1,7 @@
 using Test
 using StaticArrays
 using PolygonArea
-using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, translate, scale, square
+using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate, translate, scale, square
 
 @testset "Polygons" begin
 
@@ -57,7 +57,7 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, tra
         @test Point(0.5, 0.5) in c1
         @test !(Point(0.9, 0.9) in c1)
 
-        c2 = unit_square ∩ invert(hp)  # Keep only the top-right corner
+        c2 = unit_square ∩ complement(hp)  # Keep only the top-right corner
         @test !(Point(0.5, 0.5) in c2)
         @test Point(0.9, 0.9) in c2
 
@@ -67,8 +67,8 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, tra
         left = HalfPlane(1.0, 0.0, -0.5)
         top = HalfPlane(0.0, 1.0, -0.5)
         top_left = top ∩ left
-        bottom_right = invert(top) ∩ invert(left)
-        @test bottom_right == invert(top ∪ left)
+        bottom_right = complement(top) ∩ complement(left)
+        @test bottom_right == complement(top ∪ left)
         @test (unit_square ∩ left) ∩ top == unit_square ∩ (left ∩ top)
 
         @test area(unit_square ∩ left) == 0.5
@@ -78,7 +78,7 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, invert, rotate, tra
         @test area(unit_square ∩ (bottom_right ∪ top_left)) ≈ 0.5
         @test area(unit_square ∩ (bottom_right ∩ top_left)) ≈ 0.0
 
-        @test (square((0.0, 0.0), 1.0) |> invert |> typeof) == Reunion{HalfPlane{Float64}}
+        @test (square((0.0, 0.0), 1.0) |> complement |> typeof) == Reunion{HalfPlane{Float64}}
         @test area(square((0.0, 0.0), 3.0) \ square((1.0, 1.0), 1.0)) == 8.0
 
         # Intersection with ConvexPolygon

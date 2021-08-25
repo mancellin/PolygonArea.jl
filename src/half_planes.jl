@@ -50,7 +50,7 @@ angle(h::HalfPlane{T}) where T = mod(atan(h.b, h.a), 2*T(π))
 
 translate(h::HalfPlane, v) = (n = outward_normal(h); HalfPlane(h.a, h.b, h.c - v[1]*n[1] - v[2]*n[2]))
 rotate(h::HalfPlane, ϕ; center=Point(0.0, 0.0)) = PolarHalfPlane(signed_distance(center, h), angle(h) + ϕ; center=center)
-invert(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
+complement(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
 exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
 
 function corner_point(h1::HalfPlane{T}, h2::HalfPlane{T}) where T

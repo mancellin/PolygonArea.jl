@@ -2,7 +2,7 @@ using Test
 using PolygonArea
 using PolygonArea: PolarHalfPlane, Point, corner_point, Intersection, Reunion
 using PolygonArea: signed_distance, distance, outward_normal, angle
-using PolygonArea: invert, rotate, translate, distance, exchange_x_and_y
+using PolygonArea: complement, rotate, translate, distance, exchange_x_and_y
 using StaticArrays
 
 @testset "Half-planes" begin
@@ -105,8 +105,8 @@ using StaticArrays
         @test Point(1, -1) in intersect(inferior_hp, right_hp)
         @test Point(1, -1) in inferior_hp ∩ right_hp
         @test !(Point(1, 1) in intersect(inferior_hp, right_hp))
-        @test Point(1, 1) in invert(inferior_hp ∩ right_hp)
-        @test Point(1, 1) in invert(inferior_hp ∪ invert(right_hp))
+        @test Point(1, 1) in complement(inferior_hp ∩ right_hp)
+        @test Point(1, 1) in complement(inferior_hp ∪ complement(right_hp))
 
         @test !(Point(-1, 1) in union(inferior_hp, right_hp))
         @test (Point(1, 1) in union(inferior_hp, right_hp))
@@ -123,7 +123,7 @@ using StaticArrays
 
         HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(0.0, 1.0, 0.0) ∩ (HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(0.0, 1.0, 0.0))
 
-        @test Point(0.0, 0.0) in ((h1 ∪ h1) ∩ (h1 ∪ h1) |> invert)
+        @test Point(0.0, 0.0) in ((h1 ∪ h1) ∩ (h1 ∪ h1) |> complement)
     end
 
     @testset "conversion" begin

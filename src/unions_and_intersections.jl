@@ -31,10 +31,10 @@ in(p, u::Reunion) = any((p in h) for h in u.content)
 isempty(i::Intersection) = any(isempty(h) for h in i.content)
 isempty(u::Reunion) = all(isempty(h) for h in u.content)
 
-invert(i::Intersection) = foldl(union, (invert(h) for h in i.content))
-invert(u::Reunion) = foldl(intersect, (invert(h) for h in u.content))
+complement(i::Intersection) = foldl(union, (complement(h) for h in i.content))
+complement(u::Reunion) = foldl(intersect, (complement(h) for h in u.content))
 
-\(c1::Surface, c2::Surface) = c1 ∩ invert(c2)
+\(c1::Surface, c2::Surface) = c1 ∩ complement(c2)
 \(c1::Surface, u2::Reunion) = foldl(\, u2.content, init=c1)
 
 # Union and intersection of half planes

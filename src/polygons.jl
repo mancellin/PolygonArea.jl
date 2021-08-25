@@ -52,7 +52,7 @@ end
 convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, c::ConvexPolygon{T}) where T = convert(Reunion{Intersection{HalfPlane{T}}}, convert(Intersection{HalfPlane{T}}, c))
 
 in(p, c::ConvexPolygon{T}) where T = in(p, convert(Intersection{HalfPlane{T}}, c))
-invert(c::ConvexPolygon{T}) where T = invert(convert(Intersection{HalfPlane{T}}, c))
+complement(c::ConvexPolygon{T}) where T = complement(convert(Intersection{HalfPlane{T}}, c))
 
 # INTERSECTIONS BETWEEN CONVEX POLYGONS
 
@@ -101,9 +101,9 @@ convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{ConvexPolygon{T}
 
 promote_rule(::Type{ConvexPolygon{T}}, ::Type{Reunion{ConvexPolygon{T}}}) where T = Reunion{ConvexPolygon{T}}
 
-invert(c::Reunion{ConvexPolygon{T}}) where T = invert(convert(Reunion{Intersection{HalfPlane{T}}}, c))
+complement(c::Reunion{ConvexPolygon{T}}) where T = complement(convert(Reunion{Intersection{HalfPlane{T}}}, c))
 
-# _cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T = (c ∩ h, c ∩ invert(h))
+# _cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T = (c ∩ h, c ∩ complement(h))
 # function _cut(c::ConvexPolygon{T}, ih::Intersection{HalfPlane{T}}) where T
 # 	for h in ih.content
 #         c, rest = _cut(c, h)
@@ -112,7 +112,7 @@ invert(c::Reunion{ConvexPolygon{T}}) where T = invert(convert(Reunion{Intersecti
 # 		end
 # 	end
 #     return c
-#     (c ∩ h, c ∩ invert(h))
+#     (c ∩ h, c ∩ complement(h))
 # end
 
 function intersect(c::ConvexPolygon{T}, uh::Reunion{HalfPlane{T}}) where T
@@ -120,7 +120,7 @@ function intersect(c::ConvexPolygon{T}, uh::Reunion{HalfPlane{T}}) where T
     rest = c
 	for h in uh.content
         ci = rest ∩ h
-        rest = rest ∩ invert(h)
+        rest = rest ∩ complement(h)
         if !isempty(ci)
             push!(u_poly.content, ci)
         end
@@ -134,7 +134,7 @@ function intersect(c::ConvexPolygon{T}, uih::Reunion{Intersection{HalfPlane{T}}}
     rest = c
 	for ih in uih.content
         ci = rest ∩ ih
-        rest = rest ∩ invert(ih)
+        rest = rest ∩ complement(ih)
         if !isempty(ci)
             u_poly = u_poly ∪ ci
         end
