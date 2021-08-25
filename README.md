@@ -4,6 +4,7 @@ A claimless Julia package to compute the area of unions and intersections of pol
 
 Features:
 * Pure Julia with no dependancies.
+* Generic types (coordinates can be floats, rational numbers or anything else).
 * Non-convex polygons are supported (as union of convex polygons).
 * Plot the polygons with Plots.jl.
 
@@ -39,4 +40,4 @@ You might also be interested in more optimized and more tested packages of the [
 
 ## Credits
 
-MIT License, 2020, Matthieu Ancellin.
+MIT License, 2020-2021, Matthieu Ancellin.
