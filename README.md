@@ -16,22 +16,40 @@ Features:
 
 ## Example
 
+### Intersection of a square and a circle
+
 ```julia
 julia> using PolygonArea
 
-julia> r = rectangle(0.0, 0.0, 1.0, 1.0)
-ConvexPolygon with 4 sides
+julia> r = rectangle((0.0, 0.0), (1.0, 1.0))
+ConvexPolygon{Float64} with 4 vertices
+[...]
 
-julia> c = circle(0.9, 0.9, 0.6, 100)
-ConvexPolygon with 100 sides
+julia> c = circle((0.9, 0.9), 0.6, 100)
+ConvexPolygon{Float64} with 100 vertices
+[...]
 
 julia> area(r ∩ c)
-0.41229971200585536
+0.41229971200585397
 
 julia> using Plots
-[ Info: Precompiling Plots [91a5bcdd-55d7-5caf-9e0b-520d859cae80]
 
 julia> plot(r ∩ c)
+```
+
+### Rational coordinates
+
+```julia
+julia> r2 = rectangle((0//1, 0//1), (1//1, 1//1))
+ConvexPolygon{Rational{Int}} with 4 vertices
+[...]
+
+julia> r3 = rectangle((1//3, 1//3), (4//3, 4//3))
+ConvexPolygon{Rational{Int}} with 4 vertices
+[...]
+
+julia> area(r2 ∩ r3)
+4//9
 ```
 
 ## Alternative software
