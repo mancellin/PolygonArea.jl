@@ -14,7 +14,6 @@ nb_sides(p::ConvexPolygon) = length(p.vertices)
 ==(p1::ConvexPolygon, p2::ConvexPolygon) = nb_sides(p1) == nb_sides(p2) && all(p1.vertices .== p2.vertices)
 
 vertices(p::ConvexPolygon) = p.vertices
-sides(p::ConvexPolygon) = [c[1] for c in p.corners]
 
 isempty(p::ConvexPolygon) = length(p.vertices) <= 2
 
