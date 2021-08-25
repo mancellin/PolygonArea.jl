@@ -45,18 +45,23 @@ using StaticArrays
     end
 
     @testset "properties" begin
+        @test signed_distance((0.0, 0.0), PolarHalfPlane(-4.0, 2π/3)) ≈ -4.0
+        @test signed_distance((0.0, 0.0), PolarHalfPlane(4.0, π/3)) ≈ 4.0
+
+        # Works with Points (SVector) as well as tuples
         @test distance(Point(9.0, 0.0), PolarHalfPlane(0.0, 0.0)) ≈ 9.0
         @test distance((9.0, 0.0), PolarHalfPlane(0.0, 0.0)) ≈ 9.0
 
-        @test distance(Point(9.0, 0.0), PolarHalfPlane(1.0, 0.0)) ≈ 10.0
-        @test distance(Point(9.0, -10.0), PolarHalfPlane(1.0, 0.0)) ≈ 10.0
-        @test distance(Point(9.0, 1.0), PolarHalfPlane(0.0, π/2)) ≈ 1.0
-        @test distance(Point(1.0, 1.0), PolarHalfPlane(0.0, π/4)) ≈ √2
-        @test distance(Point(2.0, 2.0), PolarHalfPlane(-√2, π/4)) ≈ √2
-        @test distance(Point(6.0, 1.0), PolarHalfPlane(0.0, π/4, center=Point(5.0, 0.0))) ≈ √2
+        # Scaling of the definition of the plane
+        @test distance((1.0, 1.0), HalfPlane(-1.0, 0.0, 0.0)) == distance((1.0, 1.0), HalfPlane(-2.0, 0.0, 0.0))
+        @test distance((1.0, 1.0), HalfPlane(-1.0, -1.0, 0.0)) == distance((1.0, 1.0), HalfPlane(-2.0, -2.0, 0.0))
 
-        @test signed_distance(Point(0.0, 0.0), PolarHalfPlane(-4.0, 2π/3)) ≈ -4.0
-        @test signed_distance(Point(0.0, 0.0), PolarHalfPlane(4.0, π/3)) ≈ 4.0
+        @test distance((9.0, 0.0), PolarHalfPlane(1.0, 0.0)) ≈ 10.0
+        @test distance((9.0, -10.0), PolarHalfPlane(1.0, 0.0)) ≈ 10.0
+        @test distance((9.0, 1.0), PolarHalfPlane(0.0, π/2)) ≈ 1.0
+        @test distance((1.0, 1.0), PolarHalfPlane(0.0, π/4)) ≈ √2
+        @test distance((2.0, 2.0), PolarHalfPlane(-√2, π/4)) ≈ √2
+        @test distance((6.0, 1.0), PolarHalfPlane(0.0, π/4, center=Point(5.0, 0.0))) ≈ √2
 
         @test angle(PolarHalfPlane(0.0, π/8)) ≈ π/8
         @test angle(PolarHalfPlane(0.0, -π/8)) ≈ mod(-π/8, 2π)
@@ -80,7 +85,7 @@ using StaticArrays
 
         # Translate
         @test outward_normal(translate(PolarHalfPlane(0π), SVector{2}(1.0, 1.0))) == outward_normal(PolarHalfPlane(0π))
-        @test distance(Point(0.0, 0.0), translate(PolarHalfPlane(0π), SVector{2}(1.0, 1.0))) == 1.0
+        @test distance(Point(2.0, 0.0), translate(PolarHalfPlane(0π), SVector{2}(1.0, 1.0))) == 1.0
         @test Point(1.0, 0.0) in translate(HalfPlane(1.0, 0.0, 0.0), SVector(2.0, 0.0))
 
         @test Point(1.0, 0.0) in translate(HalfPlane(1.0, 0.0, 0.0) ∪ HalfPlane(1.0, 0.1, 0.0), SVector(2.0, 0.0))

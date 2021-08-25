@@ -41,11 +41,11 @@ PolarHalfPlane(θ; center=Point(0.0, 0.0)) = PolarHalfPlane(0.0, θ; center=cent
 isapprox(h1::HalfPlane, h2::HalfPlane; kw...) = all((isapprox(h1.a, h2.a; kw...), isapprox(h1.b, h2.b; kw...), isapprox(h1.c, h2.c; kw...)))
 
 equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
-signed_distance(p, h::HalfPlane) = equation(h)(p[1], p[2])
-distance(p, h::HalfPlane) = abs(equation(h)(p[1], p[2]))
 in(p, h::HalfPlane) = equation(h)(p[1], p[2]) <= 0.0
+signed_distance(p, h::HalfPlane) = equation(h)(p[1], p[2])/hypot(h.a, h.b)
+distance(p, h::HalfPlane) = max(signed_distance(p, h), 0.0)
 
-outward_normal(h::HalfPlane{T}) where T = SVector{2, T}(h.a, h.b)
+outward_normal(h::HalfPlane{T}) where T = SVector{2, T}(h.a, h.b)/hypot(h.a, h.b)
 angle(h::HalfPlane{T}) where T = mod(atan(h.b, h.a), 2*T(π))
 
 translate(h::HalfPlane, v) = (n = outward_normal(h); HalfPlane(h.a, h.b, h.c - v[1]*n[1] - v[2]*n[2]))
