@@ -7,6 +7,8 @@ struct HalfPlane{T} <: Surface
     c::T
 end
 
+HalfPlane(a, b, c) = HalfPlane(promote(a, b, c)...)
+
 function HalfPlane{T}(p1::Point{T}, p2::Point{T}, side) where T
     a = - p2[2] + p1[2]
     b = + p2[1] - p1[1]

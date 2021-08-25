@@ -94,6 +94,11 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate,
         r3 = rectangle(1.5, 1.5, 2.5, 2.5)
         @test area((unit_square ∪ r2) ∩ (r1 ∪ r3)) == 2.0
 
+        # Intersection with circle
+        c = circle(0.0, 0.0, 1.0, 100)
+        r = rectangle(0.0, -1.0, 1.0, 1.0)
+        @test area(c ∩ r) ≈ area(r ∩ c) ≈ area(c)/2
+
         # Disjoint union
         c = circle(0.0, 0.0, 1.0, 10)
         @test PolygonArea.disjoint(c) == c
@@ -104,9 +109,9 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate,
         @test area(PolygonArea.disjoint(h ∪ v)) ≈ 5/9
 
         # A floating point bug: intersection of a circle with a tangeant half plane
-        c = circle((0.5, 0.5), 0.4, 60) |> rotate(π/5, center=(0.5, 0.5))
+        c = circle((0.5, 0.5), 0.4, 60) |> PolygonArea.rotate(π/5, center=(0.5, 0.5))
         r = rectangle(0.45, 0.10, 0.46, 0.11)
-        @test PolygonArea.area(r ∩ c) ≈ PolygonArea.area(c ∩ r) 
+        @test PolygonArea.area(r ∩ c) ≈ PolygonArea.area(c ∩ r)
 
         # 
         horizontal_rectangle = PolygonArea.rectangle((0.4, 0.2), (0.6, 0.8))

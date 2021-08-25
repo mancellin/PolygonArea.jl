@@ -14,17 +14,11 @@ rectangle(; bottom_left, top_right) = rectangle(bottom_left, top_right)
 square(bottom_left, side::Number) = rectangle(bottom_left[1], bottom_left[2], bottom_left[1] + side, bottom_left[2] + side)
 square(; bottom_left, side) = square(bottom_left, side)
 
-function circle(center, radius::Real, nb_sides::Int)
-    sides = HalfPlane{Float64}[]
-    for θ in reverse(LinRange(0.0, 2π, nb_sides+1)[1:nb_sides])
-        push!(sides, PolarHalfPlane(-radius, θ, center=center))
-    end
-    polygon = ConvexPolygon{Float64}(Point{Float64}[])
-    for i in 1:(nb_sides-1)
-        push!(polygon.vertices, corner_point(sides[i], sides[i+1]))
-    end
-    push!(polygon.vertices, corner_point(sides[end], sides[1]))
-    return polygon
+
+function circle(x0::T, y0::T, radius::T, nb_vertices::Int) where T
+    vertices = [Point{T}(x0 + radius*cos(θ), y0 - radius*sin(θ)) for θ in LinRange(0.0, 2π, nb_vertices+1)[1:nb_vertices]]
+    return ConvexPolygon(vertices)
 end
 
-circle(x0, y0, r, nb_sides) = circle(Point(x0, y0), r, nb_sides)
+circle(x0, y0, r, nb_vertices) = circle(promote(x0, y0, r)..., nb_vertices)
+circle(center::Union{Point, Tuple}, r, nb_sides) = circle(center[1], center[2], r, nb_sides)
