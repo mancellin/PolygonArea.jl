@@ -28,8 +28,8 @@ function circle(center::Point, point::Point, nb_vertices::Int)
     return circle(center, radius, nb_vertices)
 end
 
-function circle(point1::Point, point2::Point, curvature::Real, nb_vertices::Int)
-    radius = 1.0/curvature
+function circle(point1::Point{T}, point2::Point{T}, curvature::T, nb_vertices::Int) where T <: Real
+    radius = one(T)/curvature
     distance_between_points = sqrt((point2[1] - point1[1])^2 + (point2[2] - point1[2])^2)
     n = (point2 - point1) / distance_between_points
     on_median = sqrt(radius^2 - (distance_between_points/2)^2)
