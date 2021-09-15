@@ -4,7 +4,7 @@ using RecipesBase
     if !(xlims isa Tuple && ylims isa Tuple)
         error("Please provide 'xlims' and 'ylims' to plot an infinite surface.")
     end
-    margin = 0.1
+    margin = convert(typeof(xlims[1]), 0.1)
     h ∩ rectangle(xlims[1]-margin, ylims[1]-margin,
                   xlims[2]+margin, ylims[2]+margin)
 end
