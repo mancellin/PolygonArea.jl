@@ -16,13 +16,14 @@ square(; bottom_left, side) = square(bottom_left, side)
 
 
 function circle(x0::T, y0::T, radius::T, angle_range::AbstractVector) where T
-    vertices = [Point{T}(x0 + radius*cos(θ), y0 - radius*sin(θ)) for θ in angle_range]
+    vertices = [Point{T}(x0 + radius*cos(θ), y0 + radius*sin(θ)) for θ in reverse(angle_range)]
     push!(vertices, Point{T}(x0, y0))
     return ConvexPolygon(vertices)
 end
 
 function circle(x0::T, y0::T, radius::T, nb_vertices::Int) where T
-    vertices = [Point{T}(x0 + radius*cos(θ), y0 - radius*sin(θ)) for θ in LinRange(0.0, 2π, nb_vertices+1)[1:nb_vertices]]
+    vertices = [Point{T}(x0 + radius*cos(θ), y0 + radius*sin(θ)) for θ in reverse(LinRange(0.0, 2π, nb_vertices+1)[1:nb_vertices])]
+    # Reversed, such that the inner of the domain is on the right of the interface
     return ConvexPolygon(vertices)
 end
 
@@ -35,12 +36,17 @@ function circle(center::Point, point::Point, θ_range)
     return circle(center, radius, θ_range)
 end
 
-function circle(point1::Point{T}, point2::Point{T}, curvature::T, θ_range) where T <: Real
+function _circle_center(point1::Point{T}, point2::Point{T}, curvature::T) where T
     radius = one(T)/curvature
     distance_between_points = sqrt((point2[1] - point1[1])^2 + (point2[2] - point1[2])^2)
-    n = (point2 - point1) / distance_between_points
+    t = (point2 - point1) / distance_between_points
     on_median = sqrt(radius^2 - (distance_between_points/2)^2)
-    n_ortho = SVector(n[2], -n[1])
-    center = point1 + distance_between_points/2 * n + on_median * n_ortho
+    n = SVector(t[2], -t[1])
+    return radius, point1 + distance_between_points/2 * t + on_median * n
+end
+
+
+function circle(point1::Point{T}, point2::Point{T}, curvature::T, θ_range) where T <: Real
+    radius, center = _circle_center(point1, point2, curvature)
     return circle(center, radius, θ_range)
 end
