@@ -125,5 +125,13 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate,
     @testset "generic programming" begin
         using Unitful: m
         @test area(PolygonArea.ConvexPolygon([(1m, 0m), (1m, 1m), (0m, 1m), (0m, 0m)])) == 1m^2
+
+        # Conversion and promotion
+        T = Reunion{Intersection{HalfPlane{Float64}}}
+        @test convert(T, HalfPlane(1f0, 1f0, 0f0)) isa T
+        @test convert(T, rectangle(1f0, 1f0, 2f0, 2f0)) isa T
+
+        @test (HalfPlane(1, 1, 1) ∩ HalfPlane(1f0, 2f0, 3f0)) isa Intersection{HalfPlane{Float32}}
+        @test (rectangle(0, 0, 2, 2) ∩ rectangle(1f0, 1f0, 3f0, 3f0)) isa ConvexPolygon{Float32}
     end
 end

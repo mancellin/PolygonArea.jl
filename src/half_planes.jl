@@ -40,6 +40,9 @@ HalfPlane(p1, p2, side::Symbol=:right) = (T = eltype(p1); HalfPlane{T}(Point{T}(
 PolarHalfPlane(r, θ; center=Point(0.0, 0.0)) = HalfPlane(cos(θ), sin(θ), -cos(θ)*center[1] - sin(θ)*center[2] + r)
 PolarHalfPlane(θ; center=Point(0.0, 0.0)) = PolarHalfPlane(0.0, θ; center=center)
 
+convert(::Type{HalfPlane{T}}, h::HalfPlane{U}) where {T, U} = HalfPlane{T}(convert(T, h.a), convert(T, h.b), convert(T, h.c))
+promote_rule(::Type{HalfPlane{T}}, ::Type{HalfPlane{U}}) where {T, U} = HalfPlane{promote_type(T, U)}
+
 isapprox(h1::HalfPlane, h2::HalfPlane; kw...) = all((isapprox(h1.a, h2.a; kw...), isapprox(h1.b, h2.b; kw...), isapprox(h1.c, h2.c; kw...)))
 
 equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c

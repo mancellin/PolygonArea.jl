@@ -39,18 +39,18 @@ complement(u::Reunion) = foldl(intersect, (complement(h) for h in u.content))
 
 # Union and intersection of half planes
 
-convert(::Type{Intersection{HalfPlane{T}}}, h::HalfPlane{T}) where T = Intersection{HalfPlane{T}}([h])
-convert(::Type{Reunion{HalfPlane{T}}}, h::HalfPlane{T}) where T = Reunion{HalfPlane{T}}([h])
-convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, h::HalfPlane{T}) where T = Reunion{Intersection{HalfPlane{T}}}([Intersection{HalfPlane{T}}([h])])
-convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, i::Intersection{HalfPlane{T}}) where T = Reunion{Intersection{HalfPlane{T}}}([i])
-convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{HalfPlane{T}}) where T = Reunion{Intersection{HalfPlane{T}}}([Intersection{HalfPlane{T}}([h]) for h in u.content])
+convert(::Type{Intersection{HalfPlane{T}}}, h::HalfPlane) where T = Intersection{HalfPlane{T}}([h])
+convert(::Type{Reunion{HalfPlane{T}}}, h::HalfPlane) where T = Reunion{HalfPlane{T}}([h])
+convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, h::HalfPlane) where T = Reunion{Intersection{HalfPlane{T}}}([Intersection{HalfPlane{T}}([h])])
+convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, i::Intersection{HalfPlane{U}}) where {T, U} = Reunion{Intersection{HalfPlane{T}}}([i])
+convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{HalfPlane{U}}) where {T, U} = Reunion{Intersection{HalfPlane{T}}}([Intersection{HalfPlane{T}}([h]) for h in u.content])
 
-promote_rule(::Type{HalfPlane{T}}, ::Type{Intersection{HalfPlane{T}}}) where T = Intersection{HalfPlane{T}}
-promote_rule(::Type{HalfPlane{T}}, ::Type{Reunion{HalfPlane{T}}}) where T = Reunion{HalfPlane{T}}
-promote_rule(::Type{HalfPlane{T}}, ::Type{Reunion{Intersection{HalfPlane{T}}}}) where T = Reunion{Intersection{HalfPlane{T}}}
-promote_rule(::Type{Intersection{HalfPlane{T}}}, ::Type{Reunion{Intersection{HalfPlane{T}}}}) where T = Reunion{Intersection{HalfPlane{T}}}
-promote_rule(::Type{Reunion{HalfPlane{T}}}, ::Type{Reunion{Intersection{HalfPlane{T}}}}) where T = Reunion{Intersection{HalfPlane{T}}}
-promote_rule(::Type{Reunion{HalfPlane{T}}}, ::Type{Intersection{HalfPlane{T}}}) where T = Reunion{Intersection{HalfPlane{T}}}
+promote_rule(::Type{HalfPlane{T}}, ::Type{Intersection{HalfPlane{U}}}) where {T, U} = Intersection{HalfPlane{promote_type(T, U)}}
+promote_rule(::Type{HalfPlane{T}}, ::Type{Reunion{HalfPlane{U}}}) where {T, U} = Reunion{HalfPlane{promote_type(T, U)}}
+promote_rule(::Type{HalfPlane{T}}, ::Type{Reunion{Intersection{HalfPlane{U}}}}) where {T, U} = Reunion{Intersection{HalfPlane{promote_type(T, U)}}}
+promote_rule(::Type{Intersection{HalfPlane{T}}}, ::Type{Reunion{Intersection{HalfPlane{U}}}}) where {T, U} = Reunion{Intersection{HalfPlane{promote_type(T, U)}}}
+promote_rule(::Type{Reunion{HalfPlane{T}}}, ::Type{Reunion{Intersection{HalfPlane{U}}}}) where {T, U} = Reunion{Intersection{HalfPlane{promote_type(T, U)}}}
+promote_rule(::Type{Reunion{HalfPlane{T}}}, ::Type{Intersection{HalfPlane{U}}}) where {T, U} = Reunion{Intersection{HalfPlane{promote_type(T, U)}}}
 
 union(s1::Surface, s2::Surface) = union(promote(s1, s2)...)
 intersect(s1::Surface, s2::Surface) = intersect(promote(s1, s2)...)

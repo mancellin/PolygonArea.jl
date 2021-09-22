@@ -3,7 +3,7 @@
 ##############
 
 struct ConvexPolygon{T} <: Surface
-    vertices::Vector{SVector{2, T}}
+    vertices::Vector{Point{T}}
 end
 
 ConvexPolygon(v::Vector{Tuple{T, T}}) where T = ConvexPolygon{T}([SVector(i1, i2) for (i1, i2) in v])
@@ -38,17 +38,20 @@ end
 
 # REPRESENTATION AS INTERSECTION OF HALF-PLANES
 
-function convert(::Type{Intersection{HalfPlane{T}}}, p::ConvexPolygon{T}) where T
+function convert(::Type{Intersection{HalfPlane{T}}}, p::ConvexPolygon{U}) where {T, U}
     if isempty(p); return Intersection{HalfPlane{T}}(HalfPlane{T}[]); end
     half_planes = Intersection{HalfPlane{T}}(Vector{HalfPlane{T}}(undef, nb_sides(p)))
     last_i = nb_vertices(p)
     for i in 1:nb_vertices(p)
-        half_planes.content[i] = HalfPlane{T}(p.vertices[last_i], p.vertices[i], :right)
+      half_planes.content[i] = HalfPlane{T}(convert(Point{T}, p.vertices[last_i]), convert(Point{T}, p.vertices[i]), :right)
         last_i = i
     end
     return half_planes
 end
-convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, c::ConvexPolygon{T}) where T = convert(Reunion{Intersection{HalfPlane{T}}}, convert(Intersection{HalfPlane{T}}, c))
+convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, c::ConvexPolygon{U}) where {T, U} = convert(Reunion{Intersection{HalfPlane{T}}}, convert(Intersection{HalfPlane{T}}, c))
+
+convert(::Type{ConvexPolygon{T}}, p::ConvexPolygon{U}) where {T, U} = ConvexPolygon{T}(convert.(Point{T}, p.vertices))
+promote_rule(::Type{ConvexPolygon{T}}, ::Type{ConvexPolygon{U}}) where {T, U} = ConvexPolygon{promote_type(T, U)}
 
 in(p, c::ConvexPolygon{T}) where T = in(p, convert(Intersection{HalfPlane{T}}, c))
 complement(c::ConvexPolygon{T}) where T = complement(convert(Intersection{HalfPlane{T}}, c))
@@ -95,10 +98,10 @@ intersect(c1::ConvexPolygon{T}, c2::ConvexPolygon{T})  where T = intersect(c1, c
 
 # REUNION OF CONVEX POLYGONS
 
-convert(::Type{Reunion{ConvexPolygon{T}}}, c::ConvexPolygon{T}) where T = Reunion{ConvexPolygon{T}}([c])
-convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{ConvexPolygon{T}}) where T = Reunion{Intersection{HalfPlane{T}}}(map(c -> convert(Intersection{HalfPlane{T}}, c), u.content))
+convert(::Type{Reunion{ConvexPolygon{T}}}, c::ConvexPolygon{U}) where {T, U} = Reunion{ConvexPolygon{T}}([c])
+convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{ConvexPolygon{U}}) where {T, U} = Reunion{Intersection{HalfPlane{T}}}(map(c -> convert(Intersection{HalfPlane{T}}, c), u.content))
 
-promote_rule(::Type{ConvexPolygon{T}}, ::Type{Reunion{ConvexPolygon{T}}}) where T = Reunion{ConvexPolygon{T}}
+promote_rule(::Type{ConvexPolygon{T}}, ::Type{Reunion{ConvexPolygon{U}}}) where {T, U} = Reunion{ConvexPolygon{promote_type(T, U)}}
 
 complement(c::Reunion{ConvexPolygon{T}}) where T = complement(convert(Reunion{Intersection{HalfPlane{T}}}, c))
 
