@@ -40,10 +40,14 @@ complement(u::Reunion) = foldl(intersect, (complement(h) for h in u.content))
 # Union and intersection of half planes
 
 convert(::Type{Intersection{HalfPlane{T}}}, h::HalfPlane) where T = Intersection{HalfPlane{T}}([h])
+convert(::Type{Intersection{HalfPlane{T}}}, i::Intersection{HalfPlane{U}}) where {T, U} = Intersection{HalfPlane{T}}([convert(HalfPlane{T}, h) for h in i.content])
+
 convert(::Type{Reunion{HalfPlane{T}}}, h::HalfPlane) where T = Reunion{HalfPlane{T}}([h])
 convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, h::HalfPlane) where T = Reunion{Intersection{HalfPlane{T}}}([Intersection{HalfPlane{T}}([h])])
 convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, i::Intersection{HalfPlane{U}}) where {T, U} = Reunion{Intersection{HalfPlane{T}}}([i])
 convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{HalfPlane{U}}) where {T, U} = Reunion{Intersection{HalfPlane{T}}}([Intersection{HalfPlane{T}}([h]) for h in u.content])
+
+convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{Intersection{HalfPlane{U}}}) where {T, U} = Reunion{Intersection{HalfPlane{T}}}([convert(Intersection{HalfPlane{T}}, i) for i in u.content])
 
 promote_rule(::Type{HalfPlane{T}}, ::Type{Intersection{HalfPlane{U}}}) where {T, U} = Intersection{HalfPlane{promote_type(T, U)}}
 promote_rule(::Type{HalfPlane{T}}, ::Type{Reunion{HalfPlane{U}}}) where {T, U} = Reunion{HalfPlane{promote_type(T, U)}}
