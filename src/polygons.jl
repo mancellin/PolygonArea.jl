@@ -51,6 +51,8 @@ end
 convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, c::ConvexPolygon{U}) where {T, U} = convert(Reunion{Intersection{HalfPlane{T}}}, convert(Intersection{HalfPlane{T}}, c))
 
 convert(::Type{ConvexPolygon{T}}, p::ConvexPolygon{U}) where {T, U} = ConvexPolygon{T}(convert.(Point{T}, p.vertices))
+promote_rule(::Type{HalfPlane{T}}, ::Type{ConvexPolygon{U}}) where {T, U} = Reunion{Intersection{HalfPlane{promote_type(T, U)}}}
+promote_rule(::Type{Intersection{HalfPlane{T}}}, ::Type{ConvexPolygon{U}}) where {T, U} = Reunion{Intersection{HalfPlane{promote_type(T, U)}}}
 promote_rule(::Type{Reunion{Intersection{HalfPlane{T}}}}, ::Type{ConvexPolygon{U}}) where {T, U} = Reunion{Intersection{HalfPlane{promote_type(T, U)}}}
 promote_rule(::Type{ConvexPolygon{T}}, ::Type{ConvexPolygon{U}}) where {T, U} = ConvexPolygon{promote_type(T, U)}
 
