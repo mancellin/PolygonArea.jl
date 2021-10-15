@@ -58,9 +58,10 @@ rotate(h::HalfPlane, ϕ; center=Point(0.0, 0.0)) = PolarHalfPlane(signed_distanc
 complement(h::HalfPlane) = HalfPlane(-h.a, -h.b, -h.c)
 exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
 
-function corner_point(h1::HalfPlane{T}, h2::HalfPlane{T}) where T
-    idet = one(T) / (h1.a * h2.b - h2.a * h1.b)
-    return Point{T}((-h2.b * h1.c + h1.b * h2.c) * idet, (-h1.a * h2.c + h2.a * h1.c) * idet)
+function corner_point(h1::HalfPlane{T}, h2::HalfPlane{U}) where {T, U}
+    S = promote_type(U, T)
+    idet = one(S) / (h1.a * h2.b - h2.a * h1.b)
+    return Point{S}((-h2.b * h1.c + h1.b * h2.c) * idet, (-h1.a * h2.c + h2.a * h1.c) * idet)
 end
 
 isempty(h::HalfPlane) = false
