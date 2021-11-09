@@ -26,8 +26,11 @@ include("example_polygons.jl")
 include("io.jl")
 include("plot_recipes.jl")
 
+# Curried functions
 rotate(ϕ::Number; kw...) = x -> rotate(x, ϕ; kw...)
-translate(v::SVector{2, Float64}) = x -> translate(x, v)
-translate(v::Vector{Float64}) = x -> translate(x, v)
+
+const _VectorLike = Union{SVector{2, T}, Vector{T}} where T
+translate(v::_VectorLike) = x -> translate(x, v)
+scale(v::Union{Real, _VectorLike}) = x -> scale(x, v)
 
 end # module
