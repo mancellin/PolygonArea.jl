@@ -81,5 +81,5 @@ rotate(i::Intersection{T}, ϕ; kw...) where T = Intersection{T}(map(x -> rotate(
 translate(u::Reunion{T}, v) where T = Reunion{T}(map(x -> translate(x, v), u.content))
 translate(i::Intersection{T}, v) where T = Intersection{T}(map(x -> translate(x, v), i.content))
 
-scale(u::Reunion{T}, λ, center=Point(0.0, 0.0)) where T = Reunion{T}(map(x -> scale(x, λ, center), u.content))
-scale(i::Intersection{T}, λ, center=Point(0.0, 0.0)) where T = Intersection{T}(map(x -> scale(x, λ, center), i.content))
+scale(u::Reunion{T}, λ; center=Point(0.0, 0.0)) where T = Reunion{T}(map(x -> scale(x, λ; center), u.content))
+scale(i::Intersection{T}, λ; center=Point(0.0, 0.0)) where T = Intersection{T}(map(x -> scale(x, λ; center), i.content))

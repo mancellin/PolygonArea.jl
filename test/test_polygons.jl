@@ -44,7 +44,7 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate,
         @test Point(0.0, 1.2) in translate(rectangle(0.0, 0.0, 1.0, 1.0), [-0.3, 0.5])
         @test Point(0.0, 1.2) in translate(rectangle(0.0, 0.0, 1.0, 1.0), (-0.3, 0.5))
         @test Point(1.5, 1.5) in scale(rectangle(0.0, 0.0, 1.0, 1.0), 1.5)
-        @test !(Point(1.5, 1.5) in scale(rectangle(0.0, 0.0, 1.0, 1.0), 1.5, (1.0, 1.0)))
+        @test !(Point(1.5, 1.5) in scale(rectangle(0.0, 0.0, 1.0, 1.0), 1.5, center=(1.0, 1.0)))
         λ = rand(2)
         @test area(scale(rectangle(0.0, 0.0, 1.0, 1.0), λ)) ≈ prod(λ)*area(rectangle(0.0, 0.0, 1.0, 1.0)) 
     end

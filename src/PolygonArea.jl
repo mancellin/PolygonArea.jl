@@ -31,6 +31,6 @@ rotate(ϕ::Number; kw...) = x -> rotate(x, ϕ; kw...)
 
 const _VectorLike = Union{SVector{2, T}, Vector{T}} where T
 translate(v::_VectorLike) = x -> translate(x, v)
-scale(v::Union{Real, _VectorLike}) = x -> scale(x, v)
+scale(v::Union{Real, _VectorLike}; center=Point(0.0, 0.0)) = x -> scale(x, v; center)
 
 end # module
