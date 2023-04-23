@@ -184,7 +184,7 @@ end
 area(u::Reunion{ConvexPolygon{T}}) where T = isempty(u) ? zero(T)*zero(T) : sum(area(c) for c in u.content)
 
 #AREA OF REUNION OF CONVEX POLYGON VIA INCLUSION EXCLUSION PRINCIPLE
-function polygon_union_area(u::Reunion{ConvexPolygon{T}})
+function polygon_union_area(u::Reunion{ConvexPolygon{T}}) where T
     polygons = u.content
     n = length(polygons)
     result = 0
