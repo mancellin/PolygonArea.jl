@@ -73,9 +73,9 @@ using StaticArrays
 
     @testset "transformations" begin
         # Rotate
-        @test outward_normal(rotate(PolarHalfPlane(0π), π)) == outward_normal(PolarHalfPlane(π))
-        @test outward_normal(rotate(PolarHalfPlane(0π, center=(1.0, 1.0)), π)) == outward_normal(PolarHalfPlane(π))
-        @test outward_normal(rotate(PolarHalfPlane(π/2, center=(1.0, 1.0)), π)) == outward_normal(PolarHalfPlane(3π/2))
+        @test isapprox(outward_normal(rotate(PolarHalfPlane(0π), π)), outward_normal(PolarHalfPlane(π)))
+        @test isapprox(outward_normal(rotate(PolarHalfPlane(0π, center=(1.0, 1.0)), π)), outward_normal(PolarHalfPlane(π)))
+        @test isapprox(outward_normal(rotate(PolarHalfPlane(π/2, center=(1.0, 1.0)), π)), outward_normal(PolarHalfPlane(3π/2)))
 
         @test (PolarHalfPlane(0.234π) |> rotate(π) |> rotate(-π)) ≈ PolarHalfPlane(0.234π)
         @test (PolarHalfPlane(0.234π) |> rotate(π) |> rotate(π)) ≈ PolarHalfPlane(0.234π)
