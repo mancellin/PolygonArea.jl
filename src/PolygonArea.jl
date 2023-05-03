@@ -1,7 +1,7 @@
 module PolygonArea
 
 # IMPORT/EXPORT
-using StaticArrays
+using StaticArrays, Combinatorics
 
 import Base.==, Base.isapprox
 import Base.in, Base.isempty

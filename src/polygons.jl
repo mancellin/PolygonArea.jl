@@ -181,5 +181,26 @@ function disjoint(u::Reunion{ConvexPolygon{T}}) where T
     end
     return l
 end
-area(u::Reunion{ConvexPolygon{T}}) where T = isempty(u) ? zero(T)*zero(T) : sum(area(c) for c in u.content)
 
+function area(u::Reunion{ConvexPolygon{T}}) where T
+    #Area of reunion of convex polygon via inclusion exclusion principle
+    if isempty(u)
+        return zero(T)*zero(T)
+    end
+    polygons = u.content
+    n = length(polygons)
+    result = zero(T)*zero(T)
+    for i = 1:n
+        involved_regions = Combinatorics.combinations(polygons, i)
+        term = zero(T)*zero(T)
+        for comb in involved_regions
+            region = comb[1]
+            for j = 2:length(comb)
+                region = region ∩ comb[j]
+            end
+            term += PolygonArea.area(region)
+        end
+        result += isodd(i) ? term : -term
+    end
+    return result
+end
