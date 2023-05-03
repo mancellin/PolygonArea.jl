@@ -126,6 +126,8 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate,
         using Unitful: m
         @test area(PolygonArea.ConvexPolygon([(1m, 0m), (1m, 1m), (0m, 1m), (0m, 0m)])) == 1m^2
 
+        @test typeof(area(circle((-1.0m, 0.0m), 2.0m, 6) ∪ circle((1.0m, 0.0m), 2.0m, 6))) == typeof(1.0m*1.0m)
+
         # Conversion and promotion
         T = Reunion{Intersection{HalfPlane{Float64}}}
         @test convert(T, HalfPlane(1f0, 1f0, 0f0)) isa T

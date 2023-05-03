@@ -14,9 +14,9 @@ function HalfPlane{T}(p1::Point{T}, p2::Point{T}, side) where T
     b = + p2[1] - p1[1]
     c = - a*p1[1] - b*p1[2]
     if side==:right
-        HalfPlane{T}(a, b, c)
+        HalfPlane{T}(a, b, c/oneunit(T))
     else
-        HalfPlane{T}(-a, -b, -c)
+        HalfPlane{T}(-a, -b, -c/oneunit(T))
     end
 end
 HalfPlane(p1, p2, side::Symbol=:right) = (T = eltype(p1); HalfPlane{T}(Point{T}(p1...), Point{T}(p2...), side))
@@ -45,10 +45,10 @@ promote_rule(::Type{HalfPlane{T}}, ::Type{HalfPlane{U}}) where {T, U} = HalfPlan
 
 isapprox(h1::HalfPlane, h2::HalfPlane; kw...) = all((isapprox(h1.a, h2.a; kw...), isapprox(h1.b, h2.b; kw...), isapprox(h1.c, h2.c; kw...)))
 
-equation(h::HalfPlane) = (x, y) -> h.a*x + h.b*y + h.c
-in(p, h::HalfPlane) = equation(h)(p[1], p[2]) <= 0.0
+equation(h::HalfPlane{T}) where T = (x, y) -> h.a*x + h.b*y + h.c*oneunit(T)
+in(p, h::HalfPlane{T}) where T = equation(h)(p[1], p[2]) <= zero(T)*zero(T)
 signed_distance(p, h::HalfPlane) = equation(h)(p[1], p[2])/hypot(h.a, h.b)
-distance(p, h::HalfPlane) = max(signed_distance(p, h), 0.0)
+distance(p, h::HalfPlane{T}) where T = max(signed_distance(p, h), zero(T))
 
 outward_normal(h::HalfPlane{T}) where T = SVector{2, T}(h.a, h.b)/hypot(h.a, h.b)
 angle(h::HalfPlane{T}) where T = mod(atan(h.b, h.a), 2*T(π))
@@ -60,7 +60,7 @@ exchange_x_and_y(h::HalfPlane) = HalfPlane(h.b, h.a, h.c)
 
 function corner_point(h1::HalfPlane{T}, h2::HalfPlane{U}) where {T, U}
     S = promote_type(U, T)
-    idet = one(S) / (h1.a * h2.b - h2.a * h1.b)
+    idet = oneunit(S) / (h1.a * h2.b - h2.a * h1.b)
     return Point{S}((-h2.b * h1.c + h1.b * h2.c) * idet, (-h1.a * h2.c + h2.a * h1.c) * idet)
 end
 
