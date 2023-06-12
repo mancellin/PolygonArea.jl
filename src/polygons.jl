@@ -22,9 +22,9 @@ rotate(c::ConvexPolygon{T}, ϕ; kw...) where T = ConvexPolygon{T}(map(x -> rotat
 scale(c::ConvexPolygon{T}, λ; center=Point(0.0, 0.0)) where T = ConvexPolygon{T}(map(x -> scale(x, λ; center), c.vertices))
 
 function area(c::ConvexPolygon{T}) where T
-	if isempty(c)
+    if isempty(c)
         return zero(T)*zero(T)
-	else
+    else
         # Shoelace formula
         a = zero(T)*zero(T)
         last_vertex = c.vertices[end]
@@ -33,7 +33,7 @@ function area(c::ConvexPolygon{T}) where T
             last_vertex = vertex
         end
         return abs(a)/2
-	end
+    end
 end
 
 # REPRESENTATION AS INTERSECTION OF HALF-PLANES
@@ -85,12 +85,12 @@ end
 intersect(h::HalfPlane, c::ConvexPolygon) = intersect(c, h)
 
 function intersect(c::ConvexPolygon, ih::Intersection{HalfPlane{T}}) where T
-	for h in ih.content
-		c = c ∩ h
-		if isempty(c)
-			break
-		end
-	end
+    for h in ih.content
+        c = c ∩ h
+        if isempty(c)
+            break
+        end
+    end
     return c
 end
 intersect(ih::Intersection{HalfPlane{T}}, c::ConvexPolygon) where T = intersect(c, ih)
@@ -111,12 +111,12 @@ complement(c::Reunion{ConvexPolygon{T}}) where T = complement(convert(Reunion{In
 
 # _cut(c::ConvexPolygon{T}, h::HalfPlane{T}) where T = (c ∩ h, c ∩ complement(h))
 # function _cut(c::ConvexPolygon{T}, ih::Intersection{HalfPlane{T}}) where T
-# 	for h in ih.content
+#     for h in ih.content
 #         c, rest = _cut(c, h)
-# 		if isempty(c)
-# 			break
-# 		end
-# 	end
+#         if isempty(c)
+#             break
+#         end
+#     end
 #     return c
 #     (c ∩ h, c ∩ complement(h))
 # end
@@ -125,13 +125,13 @@ function intersect(c::ConvexPolygon{T}, uh::Reunion{HalfPlane{U}}) where {T, U}
     S = promote_type(T, U)
     u_poly = Reunion{ConvexPolygon{S}}(ConvexPolygon{S}[])
     rest = c
-	for h in uh.content
+    for h in uh.content
         ci = rest ∩ h
         rest = rest ∩ complement(h)
         if !isempty(ci)
             push!(u_poly.content, ci)
         end
-	end
+    end
     return u_poly
 end
 intersect(uh::Reunion{HalfPlane{T}}, c::ConvexPolygon{U}) where {T, U} = intersect(c, uh)
@@ -140,13 +140,13 @@ function intersect(c::ConvexPolygon{T}, uih::Reunion{Intersection{HalfPlane{U}}}
     S = promote_type(T, U)
     u_poly = Reunion{ConvexPolygon{S}}(ConvexPolygon{S}[])
     rest = c
-	for ih in uih.content
+    for ih in uih.content
         ci = rest ∩ ih
         rest = rest ∩ complement(ih)
         if !isempty(ci)
             u_poly = u_poly ∪ ci
         end
-	end
+    end
     return u_poly
 end
 intersect(uih::Reunion{Intersection{HalfPlane{T}}}, c::ConvexPolygon{U}) where {T, U} = intersect(c, uih)
@@ -155,9 +155,9 @@ function intersect(uc::Reunion{ConvexPolygon{T}}, s::Surface) where T
     u_poly = Reunion{ConvexPolygon{T}}(ConvexPolygon{T}[])
     for ci in uc.content
         cii = ci ∩ s
-		if !isempty(cii)
+        if !isempty(cii)
             u_poly = u_poly ∪ cii
-		end
+        end
     end
     return u_poly
 end

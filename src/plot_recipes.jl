@@ -10,42 +10,42 @@ using RecipesBase
 end
 
 @recipe function plot(c::ConvexPolygon)
-	seriestype --> :shape
-	linealpha --> 0.9
-	fillalpha --> 0.3
-	legend --> false
-	showaxis --> false
-	aspect_ratio --> :equal
+    seriestype --> :shape
+    linealpha --> 0.9
+    fillalpha --> 0.3
+    legend --> false
+    showaxis --> false
+    aspect_ratio --> :equal
 
-	if isempty(c)
-		[], []
-	else
-		v = vertices(c)
-		push!(v, v[1])
-		[p[1] for p in v], [p[2] for p in v]
-	end
+    if isempty(c)
+        [], []
+    else
+        v = vertices(c)
+        push!(v, v[1])
+        [p[1] for p in v], [p[2] for p in v]
+    end
 end
 
 @recipe function plot(cs::Reunion{ConvexPolygon{T}}) where T
-	seriestype --> :shape
-	linealpha --> 0.9
-	fillalpha --> 0.3
-	legend --> false
-	showaxis --> false
-	aspect_ratio --> :equal
+    seriestype --> :shape
+    linealpha --> 0.9
+    fillalpha --> 0.3
+    legend --> false
+    showaxis --> false
+    aspect_ratio --> :equal
 
-	v = []
-	for c in cs.content
-		if !isempty(c)
-			append!(v, vertices(c))
-			push!(v, vertices(c)[1])
-			push!(v, Point(NaN, NaN))
-		end
-	end
-	if length(v) > 0
-		push!(v, v[1])
-		[p[1] for p in v], [p[2] for p in v]
-	else
-		[], []
-	end
+    v = []
+    for c in cs.content
+        if !isempty(c)
+            append!(v, vertices(c))
+            push!(v, vertices(c)[1])
+            push!(v, Point(NaN, NaN))
+        end
+    end
+    if length(v) > 0
+        push!(v, v[1])
+        [p[1] for p in v], [p[2] for p in v]
+    else
+        [], []
+    end
 end
