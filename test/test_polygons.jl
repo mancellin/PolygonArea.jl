@@ -104,6 +104,12 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate,
         cell = rectangle(-1.5f0, 1.5f0, -0.5f0, 2.5f0)
         @test (cell ∩ corner).disjoint
         @test area(cell ∩ corner) ≈ 1.0f0
+        # Without the flag, inclusion-exclusion goes through that degenerate
+        # intersection, which must have a zero area, not NaN.
+        p1, p2 = (cell ∩ corner).content
+        @test all(v -> all(isfinite, v), vertices(p1 ∩ p2))
+        @test area(p1 ∩ p2) ≈ 0.0f0 atol=1f-6
+        @test area(Reunion{ConvexPolygon{Float32}}([p1, p2])) ≈ 1.0f0
         @test (r \ unit_square).disjoint && area(r \ unit_square) ≈ 1.0
         @test rotate(r \ unit_square, 0.3).disjoint
         @test !(unit_square ∪ r).disjoint

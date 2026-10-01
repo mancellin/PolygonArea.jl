@@ -71,18 +71,32 @@ function intersect(c::ConvexPolygon{T}, h::HalfPlane{U}) where {T, U}
                 push!(poly_in.vertices, corner)
             else
                 # Entering
-                push!(poly_in.vertices, corner_point(HalfPlane{T}(previous_corner, corner, :right), h))
+                push!(poly_in.vertices, edge_crossing(previous_corner, corner, h, S))
                 push!(poly_in.vertices, corner)
             end
         elseif previous_corner in h
                 # Exiting
-                push!(poly_in.vertices, corner_point(HalfPlane{T}(previous_corner, corner, :right), h))
+                push!(poly_in.vertices, edge_crossing(previous_corner, corner, h, S))
         end
         previous_corner = corner
     end
     return poly_in
 end
+
 intersect(h::HalfPlane, c::ConvexPolygon) = intersect(c, h)
+
+# Point where the boundary of h crosses the segment from p1 to p2, one of which
+# is in h and the other not. Interpolating along the segment, rather than
+# intersecting its line with h's (corner_point), never divides by zero (the two
+# signed distances have opposite signs) and stays on the segment, even when the
+# two lines are (nearly) parallel, e.g. when clipping a polygon by a line that
+# contains one of its edges.
+function edge_crossing(p1, p2, h::HalfPlane, ::Type{S}) where S
+    d1 = equation(h)(p1[1], p1[2])
+    d2 = equation(h)(p2[1], p2[2])
+    t = d1 / (d1 - d2)
+    return Point{S}(p1[1] + t * (p2[1] - p1[1]), p1[2] + t * (p2[2] - p1[2]))
+end
 
 function intersect(c::ConvexPolygon, ih::Intersection{HalfPlane{T}}) where T
     for h in ih.content
