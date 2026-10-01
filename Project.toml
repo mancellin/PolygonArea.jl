@@ -1,7 +1,7 @@
 name = "PolygonArea"
 uuid = "f818da22-b9d0-4424-a67f-6ca99e6cd93f"
-authors = ["Matthieu Ancellin <matthieu.ancellin@ens-paris-saclay.fr>"]
-version = "0.4.0-dev"
+authors = ["Matthieu Ancellin <matthieu.ancellin@mews-labs.com>"]
+version = "0.4.0"
 
 [deps]
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
@@ -9,4 +9,4 @@ RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-julia = "^1.2"
+julia = "^1.6"

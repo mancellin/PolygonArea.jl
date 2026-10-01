@@ -1,9 +1,27 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    tags: ['*']
+  pull_request:
+
 jobs:
   test:
+    name: Julia ${{ matrix.version }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - '1.6' # lower bound of the julia compat in Project.toml
+          - 'lts'
+          - '1'
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - run: julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.version }}
+      - uses: julia-actions/cache@v2
+      - uses: julia-actions/julia-buildpkg@v1
+      - uses: julia-actions/julia-runtest@v1
