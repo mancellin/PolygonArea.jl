@@ -99,7 +99,7 @@ intersect(c1::ConvexPolygon{U}, c2::ConvexPolygon{T})  where {U, T} = intersect(
 
 # REUNION OF CONVEX POLYGONS
 
-convert(::Type{Reunion{ConvexPolygon{T}}}, c::ConvexPolygon{U}) where {T, U} = Reunion{ConvexPolygon{promote_type(T, U)}}([c])
+convert(::Type{Reunion{ConvexPolygon{T}}}, c::ConvexPolygon{U}) where {T, U} = Reunion{ConvexPolygon{promote_type(T, U)}}([c], true)
 function convert(::Type{Reunion{Intersection{HalfPlane{T}}}}, u::Reunion{ConvexPolygon{U}}) where {T, U}
     S = promote_type(T, U)
     Reunion{Intersection{HalfPlane{S}}}(map(c -> convert(Intersection{HalfPlane{S}}, c), u.content))
@@ -123,7 +123,7 @@ complement(c::Reunion{ConvexPolygon{T}}) where T = complement(convert(Reunion{In
 
 function intersect(c::ConvexPolygon{T}, uh::Reunion{HalfPlane{U}}) where {T, U}
     S = promote_type(T, U)
-    u_poly = Reunion{ConvexPolygon{S}}(ConvexPolygon{S}[])
+    u_poly = Reunion{ConvexPolygon{S}}(ConvexPolygon{S}[], true) # each piece is cut from the rest
     rest = c
     for h in uh.content
         ci = rest ∩ h
@@ -138,31 +138,41 @@ intersect(uh::Reunion{HalfPlane{T}}, c::ConvexPolygon{U}) where {T, U} = interse
 
 function intersect(c::ConvexPolygon{T}, uih::Reunion{Intersection{HalfPlane{U}}}) where {T, U}
     S = promote_type(T, U)
-    u_poly = Reunion{ConvexPolygon{S}}(ConvexPolygon{S}[])
+    pieces = ConvexPolygon{S}[]
+    pieces_disjoint = true # each ci is cut from the rest
     rest = c
     for ih in uih.content
-        ci = rest ∩ ih
+        ci = rest ∩ ih # rest, hence ci, can be a Reunion after the first cut
         rest = rest ∩ complement(ih)
         if !isempty(ci)
-            u_poly = u_poly ∪ ci
+            append!(pieces, _pieces(ci))
+            pieces_disjoint &= _isdisjoint(ci)
         end
     end
-    return u_poly
+    return Reunion{ConvexPolygon{S}}(pieces, pieces_disjoint)
 end
 intersect(uih::Reunion{Intersection{HalfPlane{T}}}, c::ConvexPolygon{U}) where {T, U} = intersect(c, uih)
 
 function intersect(uc::Reunion{ConvexPolygon{T}}, s::Surface) where T
     u_poly = Reunion{ConvexPolygon{T}}(ConvexPolygon{T}[])
+    pieces_disjoint = uc.disjoint
     for ci in uc.content
         cii = ci ∩ s
         if !isempty(cii)
             u_poly = u_poly ∪ cii
+            pieces_disjoint &= _isdisjoint(cii)
         end
     end
-    return u_poly
+    # Pieces of disjoint pieces of uc are disjoint if each ci ∩ s is.
+    return Reunion{ConvexPolygon{T}}(u_poly.content, pieces_disjoint)
 end
 intersect(s::Surface, uc::Reunion{ConvexPolygon{T}}) where T = intersect(uc, s)
 intersect(uc1::Reunion{ConvexPolygon{T}}, uc2::Reunion{ConvexPolygon{U}}) where {T, U} = intersect(uc1, convert(Reunion{Intersection{HalfPlane{T}}}, uc2))
+
+_isdisjoint(c::ConvexPolygon) = true
+_isdisjoint(u::Reunion) = u.disjoint
+_pieces(c::ConvexPolygon) = (c,)
+_pieces(u::Reunion) = u.content
 
 union(c1::ConvexPolygon{T}, c2::ConvexPolygon{U}) where {T, U} = Reunion{ConvexPolygon{promote_type(T, U)}}([c1, c2])
 union(u1::Reunion{ConvexPolygon{T}}, u2::Reunion{ConvexPolygon{U}}) where {T, U} = Reunion{ConvexPolygon{promote_type(T, U)}}(vcat(u1.content, u2.content))
@@ -179,13 +189,15 @@ function disjoint(u::Reunion{ConvexPolygon{T}}) where T
             l = l ∪ rest
         end
     end
-    return l
+    return Reunion{ConvexPolygon{T}}(l.content, true)
 end
 
 function area(u::Reunion{ConvexPolygon{T}}) where T
     #Area of reunion of convex polygon via inclusion exclusion principle
     if isempty(u)
         return zero(T)*zero(T)
+    elseif u.disjoint || length(u.content) == 1
+        return sum(area(c) for c in u.content)
     end
     polygons = u.content
     n = length(polygons)

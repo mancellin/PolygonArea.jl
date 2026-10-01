@@ -99,6 +99,17 @@ using PolygonArea: PolarHalfPlane, Reunion, Point, vertices, complement, rotate,
         r = rectangle(0.0, -1.0, 1.0, 1.0)
         @test area(c ∩ r) ≈ area(r ∩ c) ≈ area(c)/2
 
+        # Pieces cut from each other are disjoint, so their area is just the sum
+        corner = HalfPlane(-0.6687844f0, -0.39464733f0, 0.07552451f0) ∪ HalfPlane(0.30013427f0, -0.95389694f0, 0.95198756f0)
+        cell = rectangle(-1.5f0, 1.5f0, -0.5f0, 2.5f0)
+        @test (cell ∩ corner).disjoint
+        @test area(cell ∩ corner) ≈ 1.0f0
+        @test (r \ unit_square).disjoint && area(r \ unit_square) ≈ 1.0
+        @test rotate(r \ unit_square, 0.3).disjoint
+        @test !(unit_square ∪ r).disjoint
+        @test PolygonArea.disjoint(unit_square ∪ r).disjoint
+        @test area(PolygonArea.disjoint(unit_square ∪ r)) ≈ area(unit_square ∪ r) ≈ area(r)
+
         # Disjoint union
         c = circle(0.0, 0.0, 1.0, 10)
         @test PolygonArea.disjoint(c) == c

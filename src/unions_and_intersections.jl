@@ -19,8 +19,12 @@ end
 
 struct Reunion{T <: Surface} <: Surface
     content::Vector{T}
+    # True when the pieces are known not to overlap (they may share edges), e.g.
+    # because they were cut from each other. Their area is then just the sum of
+    # their areas, without inclusion-exclusion.
+    disjoint::Bool
 
-    Reunion{T}(content) where T = new(filter(!isempty, unique(content)))
+    Reunion{T}(content, disjoint=false) where T = new(filter(!isempty, unique(content)), disjoint)
 end
 
 # Generic fonctions
@@ -75,11 +79,11 @@ function intersect(ui1::Reunion{Intersection{HalfPlane{T}}}, ui2::Reunion{Inters
     return Reunion{Intersection{HalfPlane{T}}}(inters)
 end
 
-rotate(u::Reunion{T}, ϕ; kw...) where T = Reunion{T}(map(x -> rotate(x, ϕ; kw...), u.content))
+rotate(u::Reunion{T}, ϕ; kw...) where T = Reunion{T}(map(x -> rotate(x, ϕ; kw...), u.content), u.disjoint)
 rotate(i::Intersection{T}, ϕ; kw...) where T = Intersection{T}(map(x -> rotate(x, ϕ; kw...), i.content))
 
-translate(u::Reunion{T}, v) where T = Reunion{T}(map(x -> translate(x, v), u.content))
+translate(u::Reunion{T}, v) where T = Reunion{T}(map(x -> translate(x, v), u.content), u.disjoint)
 translate(i::Intersection{T}, v) where T = Intersection{T}(map(x -> translate(x, v), i.content))
 
-scale(u::Reunion{T}, λ; center=Point(0.0, 0.0)) where T = Reunion{T}(map(x -> scale(x, λ; center), u.content))
+scale(u::Reunion{T}, λ; center=Point(0.0, 0.0)) where T = Reunion{T}(map(x -> scale(x, λ; center), u.content), u.disjoint)
 scale(i::Intersection{T}, λ; center=Point(0.0, 0.0)) where T = Intersection{T}(map(x -> scale(x, λ; center), i.content))
